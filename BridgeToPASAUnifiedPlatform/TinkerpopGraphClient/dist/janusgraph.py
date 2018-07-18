@@ -20,27 +20,53 @@ print("cwd: " + cwd)
 print("third party: " + globalconf.THIRD_PARTY_DIR)
 print("deploy: " + globalconf.DEPLOY_DIR)
 
+zipFilePath = "{0}/{1}".format(globalconf.THIRD_PARTY_DIR, JANUS_ZIP_NAME)
+installDir = "{0}/{1}".format(globalconf.DEPLOY_DIR, JANUS_DIR_NAME)
+
 
 def delete():
     print("==== DELETE ====")
-    installDir = "{0}/{1}".format(globalconf.DEPLOY_DIR, JANUS_DIR_NAME)
     shutil.rmtree(installDir, ignore_errors=True)
+    shutil.rmtree("db", ignore_errors=True)
+    shutil.rmtree("log", ignore_errors=True)
     print("Done!")
 
-def deploy():
+def install():
     delete()
-    print("==== DEPLOY ====")
-    installPath = cwd + "/" + "tmp-deploy"
-    print("install to: " + installPath)
-    janusZipFile = globalconf.THIRD_PARTY_DIR + "/" + JANUS_ZIP_NAME
-    command = "unzip {0} -d {1}".format(janusZipFile, installPath)
+    print("==== INSTALL ====")
+    print("install to: " + installDir)
+    command = "unzip {0} -d {1}".format(zipFilePath, globalconf.DEPLOY_DIR)
     subprocess.call(command, shell=True)
     print("JanusGraph deploy done!")
 
-if command == "deploy":
-    deploy()
+def start():
+    print("==== START ====")
+    if not os.path.isdir(installDir):
+        print("Janus is not installed! Install first!")
+        sys.exit(1)
+    command = "{0}/bin/janusgraph.sh start".format(installDir)
+    subprocess.call(command, shell=True)
+    command = "{0}/bin/janusgraph.sh status".format(installDir)
+    subprocess.call(command, shell=True)
+    print("JanusGraph starts!")
+
+def stop():
+    print("==== STOP ====")
+    if not os.path.isdir(installDir):
+        print("Janus is not installed! Install first!")
+        sys.exit(1)
+    command = "{0}/bin/janusgraph.sh stop".format(installDir)
+    subprocess.call(command, shell=True)
+    print("JanusGraph stops!")    
+
+if command == "install":
+    install()
 elif command == "delete":
     delete()
+elif command == "start":
+    start()
+elif command == "stop":
+    stop()
 else:
     print("Unknown command: " + command)
 
