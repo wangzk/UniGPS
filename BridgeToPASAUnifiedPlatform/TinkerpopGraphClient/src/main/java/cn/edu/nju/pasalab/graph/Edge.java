@@ -1,3 +1,5 @@
+package cn.edu.nju.pasalab.graph;
+
 /**
  * The data structure to represent a weighted edge.
  */

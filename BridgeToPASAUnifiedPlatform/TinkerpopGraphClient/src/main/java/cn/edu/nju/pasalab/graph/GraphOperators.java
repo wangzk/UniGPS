@@ -1,3 +1,5 @@
+package cn.edu.nju.pasalab.graph;
+
 /**
  * The base class for graph operators.
  */
@@ -15,5 +17,6 @@ public class GraphOperators {
     public static final String ARG_FILE_SIZE = "fileSize";
     public static final String ARG_ELAPSED_TIME = "elapsedTime";
     public static final String ARG_TOP_VERTICES = "topVertices";
+    public static final String ARG_NUMBER_OF_CLUSTERS = "numberOfClusters";
 }
 
