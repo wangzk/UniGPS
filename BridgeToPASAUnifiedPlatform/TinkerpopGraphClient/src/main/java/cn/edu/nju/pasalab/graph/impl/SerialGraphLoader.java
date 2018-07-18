@@ -181,7 +181,7 @@ public class SerialGraphLoader {
         String command = String.format(template, vertexLabel, edgeLabel, resultPropertyName);
         submitCommand(command).one();
         System.out.println("Done!");
-        Map<String, Double> output = new HashMap<>();
+        Map<String, Double> ranks = new HashMap<>();
         if (returnTop > 0) {
             GraphTraversalSource g = getRemoteTraversal();
             GraphTraversal topResults = g.V().hasLabel(vertexLabel).order().by(resultPropertyName, decr).limit(returnTop).valueMap("name", resultPropertyName);
@@ -189,12 +189,13 @@ public class SerialGraphLoader {
                 Map<String, Object> vMap = (Map<String, Object>)topResults.next();
                 String vertex = ((List<String>)vMap.get("name")).get(0);
                 Double pageRank = ((List<Double>)vMap.get(resultPropertyName)).get(0);
-                output.put(vertex, pageRank);
+                ranks.put(vertex, pageRank);
             }
             g.close();
+            System.out.println(topResults);
         }
         commit();
-        return output;
+        return ranks;
     }
 
     public long peerPressure(String resultPropertyName) {

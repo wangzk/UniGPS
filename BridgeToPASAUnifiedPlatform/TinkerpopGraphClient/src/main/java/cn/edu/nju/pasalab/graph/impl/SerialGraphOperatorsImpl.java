@@ -39,13 +39,13 @@ public class SerialGraphOperatorsImpl {
     public static Map<String, Object> GopCSVFileToTinkerGraphSerial(String csvFile,
                                                       String graphName,
                                                       String gremlinServerConfFile,
-                                                      boolean deleteExistingGraph) throws Exception {
+                                                      String srcColumnName, String dstColumnName, String weightColumnName,
+                                                      boolean directed,
+                                                      boolean overwrite) throws Exception {
         Logger logger = Logger.getLogger(SerialGraphOperatorsImpl.class);
-        File localGremlinServerConfFile = HDFSUtils.getHDFSFileToTmpLocal(gremlinServerConfFile);
-        SerialGraphLoader loader = new SerialGraphLoader(localGremlinServerConfFile, graphName);
-        HDFSUtils.deleteLocalTmpFile(localGremlinServerConfFile);
+        SerialGraphLoader loader = getLoaderFromConfFile(gremlinServerConfFile, graphName);
         ///////////
-        if (deleteExistingGraph) {
+        if (overwrite) {
             logger.info("Start deleting the existing graph " + graphName);
             loader.clearVertices();
         }
@@ -57,13 +57,17 @@ public class SerialGraphOperatorsImpl {
         logger.info("Get CSV file header:" + ((CSVParser) records).getHeaderMap());
         ArrayList<Edge> tmpEdgeLists = new ArrayList<>();
         for(CSVRecord record: records) {
-            String src = record.get("src");
-            String dst = record.get("dst");
-            if (record.isSet("weight")) {
+            String src = record.get(srcColumnName);
+            String dst = record.get(dstColumnName);
+            if (weightColumnName != null && record.isSet(weightColumnName)) {
                 Double weight = new Double(record.get("weight"));
                 tmpEdgeLists.add(new Edge(src, dst, weight));
+                if (!directed)
+                    tmpEdgeLists.add(new Edge(dst, src, weight));
             } else {
                 tmpEdgeLists.add(new Edge(src, dst));
+                if (!directed)
+                    tmpEdgeLists.add(new Edge(dst, src));
             }
             if (tmpEdgeLists.size() >= 100) {
                 loader.addE(tmpEdgeLists, true);
@@ -75,7 +79,6 @@ public class SerialGraphOperatorsImpl {
         logger.info("Load graph done!");
         long numV = loader.getNumOfV();
         long numE = loader.getNumofE();
-        HDFSUtils.deleteLocalTmpFile(localGremlinServerConfFile);
         Map<String, Object> output = new HashMap<>();
         output.put(GraphOperators.ARG_NUMBER_OF_VERTICES, new Long(numV));
         output.put(GraphOperators.ARG_NUMBER_OF_EDGES, new Long(numE));
@@ -83,11 +86,11 @@ public class SerialGraphOperatorsImpl {
         return output;
     }
 
-    public static Map<String, Object> GopVertexTableToCSVFileSerial(String graphName,
-                                                                    String gremlinServerConfFile,
-                                                                    String csvFile,
-                                                                    List<String> properties,
-                                                                    boolean deleteExistingFile) throws Exception {
+    public static Map<String, Object> GopVertexPropertiesToCSVFileSerial(String graphName,
+                                                                         String gremlinServerConfFile,
+                                                                         String csvFile,
+                                                                         List<String> properties,
+                                                                         boolean deleteExistingFile) throws Exception {
         Logger logger = Logger.getLogger(SerialGraphOperatorsImpl.class);
         SerialGraphLoader loader = getLoaderFromConfFile(gremlinServerConfFile, graphName);
         //////////////

@@ -40,7 +40,7 @@ public class TestSerialGraphOperatorsImpl {
         String csvFile = "/home/wzk/workspace/PASAGraphProcessingSystem/BridgeToPASAUnifiedPlatform/TinkerpopGraphClient/src/test/java/cn/edu/nju/pasalab/graph/impl/test.input.csv";
         String remoteConfFile = "/home/wzk/workspace/PASAGraphProcessingSystem/BridgeToPASAUnifiedPlatform/TinkerpopGraphClient/conf/test-remote.yaml";
         Map<String, Object> output =
-        SerialGraphOperatorsImpl.GopCSVFileToTinkerGraphSerial(csvFile, testGraphName, remoteConfFile, true);
+        SerialGraphOperatorsImpl.GopCSVFileToTinkerGraphSerial(csvFile, testGraphName, remoteConfFile, "src", "dst", "weight", true, true);
         System.out.println("Num V:" + output.get(GraphOperators.ARG_NUMBER_OF_VERTICES));
         System.out.println("Num E:" + output.get(GraphOperators.ARG_NUMBER_OF_EDGES));
     }
@@ -52,7 +52,7 @@ public class TestSerialGraphOperatorsImpl {
         List<String> properties = new ArrayList<>();
         properties.add("name");properties.add("pr2");properties.add("cluster");
         Map<String, Object> output =
-                SerialGraphOperatorsImpl.GopVertexTableToCSVFileSerial(testGraphName, remoteConfFile, csvFile, properties,true);
+                SerialGraphOperatorsImpl.GopVertexPropertiesToCSVFileSerial(testGraphName, remoteConfFile, csvFile, properties,true);
         printFileContent(csvFile);
         HDFSUtils.getDefaultFS().delete(new Path(csvFile), true);
         System.out.println(output.get(SerialGraphOperators.ARG_NUMBER_OF_LINES));
