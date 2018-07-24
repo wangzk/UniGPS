@@ -2,6 +2,17 @@
 
 ## Deploy the serial version
 
+1. Install the JanusGraph database. `python2 scripts/janusgraph.py install`
+2. Start the JanusGraph database. `python2 scripts/janusgraph.py start`
+3. Test the demo code. `bash scripts/runDemo.sh`
+4. Stop the JanusGraph database. `python2 scripts/janusgraph.py stop`
+
+## Demo code
+
+Demo code is written in Java and is available at `demo/DemoSerialGraphOperators.java`. 
+
+
+
 ## Supported Operators
 
 ### 表图转换算子

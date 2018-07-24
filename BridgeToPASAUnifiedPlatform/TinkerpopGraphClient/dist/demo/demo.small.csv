@@ -1,0 +1,8 @@
+src,dst,weight
+a,b,1.0
+b,c,2.0
+c,d,3.0
+d,e,4.0
+e,a,5.0
+a,c,6.0
+d,b,7.0

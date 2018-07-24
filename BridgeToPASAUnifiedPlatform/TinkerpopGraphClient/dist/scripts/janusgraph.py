@@ -27,8 +27,8 @@ installDir = "{0}/{1}".format(globalconf.DEPLOY_DIR, JANUS_DIR_NAME)
 def delete():
     print("==== DELETE ====")
     shutil.rmtree(installDir, ignore_errors=True)
-    shutil.rmtree("db", ignore_errors=True)
-    shutil.rmtree("log", ignore_errors=True)
+    shutil.rmtree("{0}/db".format(globalconf.DEPLOY_DIR), ignore_errors=True)
+    shutil.rmtree("{0}/log".format(globalconf.DEPLOY_DIR), ignore_errors=True)
     print("Done!")
 
 def install():
@@ -37,6 +37,12 @@ def install():
     print("install to: " + installDir)
     command = "unzip {0} -d {1}".format(zipFilePath, globalconf.DEPLOY_DIR)
     subprocess.call(command, shell=True)
+    fixCommand = "echo 'scriptEvaluationTimeout: 30000000' >> {0}".format(installDir + "/" + "conf/gremlin-server/gremlin-server.yaml")
+    subprocess.call(fixCommand, shell=True)
+    start()
+    initDBCommand = "{0}/bin/gremlin.sh -e scripts/init.janus.groovy {1}/{0}/conf/gremlin-server/janusgraph-cql-es-server.properties".format(installDir, cwd)
+    subprocess.call(initDBCommand, shell=True)
+    stop()
     print("JanusGraph deploy done!")
 
 def start():
@@ -44,9 +50,9 @@ def start():
     if not os.path.isdir(installDir):
         print("Janus is not installed! Install first!")
         sys.exit(1)
-    command = "{0}/bin/janusgraph.sh start".format(installDir)
+    command = "cd {0} && {1}/bin/janusgraph.sh start".format(globalconf.DEPLOY_DIR, JANUS_DIR_NAME)
     subprocess.call(command, shell=True)
-    command = "{0}/bin/janusgraph.sh status".format(installDir)
+    command = "cd {0} && {1}/bin/janusgraph.sh status".format(globalconf.DEPLOY_DIR, JANUS_DIR_NAME)
     subprocess.call(command, shell=True)
     print("JanusGraph starts!")
 
@@ -57,7 +63,7 @@ def stop():
         sys.exit(1)
     command = "{0}/bin/janusgraph.sh stop".format(installDir)
     subprocess.call(command, shell=True)
-    print("JanusGraph stops!")    
+    print("JanusGraph stops!")
 
 if command == "install":
     install()
