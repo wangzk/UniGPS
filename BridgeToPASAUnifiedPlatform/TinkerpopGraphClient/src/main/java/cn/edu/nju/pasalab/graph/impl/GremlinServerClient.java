@@ -1,14 +1,12 @@
 package cn.edu.nju.pasalab.graph.impl;
 
-import cn.edu.nju.pasalab.graph.Edge;
-import javafx.beans.binding.ObjectExpression;
+import cn.edu.nju.pasalab.graph.MyEdge;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
 import org.apache.tinkerpop.gremlin.driver.ResultSet;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0;
-import org.apache.tinkerpop.gremlin.process.remote.RemoteConnection;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -21,15 +19,11 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.Order.decr;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal.Symbols.bothE;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.bothE;
 
-public class SerialGraphLoader {
+public class GremlinServerClient {
 
     private Cluster cluster;
     private Client client;
@@ -37,7 +31,7 @@ public class SerialGraphLoader {
     private String vertexLabel;
     private String edgeLabel;
 
-    public SerialGraphLoader(File confFile, String graphName) throws FileNotFoundException {
+    public GremlinServerClient(File confFile, String graphName) throws FileNotFoundException {
         GryoMapper.Builder kryo = GryoMapper.build();
         MessageSerializer serializer = new GryoMessageSerializerV1d0(kryo);
         cluster = Cluster.build(confFile)
@@ -50,7 +44,7 @@ public class SerialGraphLoader {
         this.edgeLabel = this.labelName + "-E";
     }
 
-    public SerialGraphLoader(String address, int port, String graphName) {
+    public GremlinServerClient(String address, int port, String graphName) {
         GryoMapper.Builder kryo = GryoMapper.build();
         MessageSerializer serializer = new GryoMessageSerializerV1d0(kryo);
         cluster = Cluster.build().addContactPoint(address).port(port)
@@ -113,27 +107,27 @@ public class SerialGraphLoader {
     }
 
     public void addE(String src, String dst) throws ExecutionException, InterruptedException {
-        Edge e = new Edge(src, dst);
-        ArrayList<Edge> list = new ArrayList<>();
+        MyEdge e = new MyEdge(src, dst);
+        ArrayList<MyEdge> list = new ArrayList<>();
         list.add(e);
         addE(list);
     }
 
     public void addE(String src, String dst, double weight) throws ExecutionException, InterruptedException {
-        Edge e = new Edge(src, dst, weight);
-        ArrayList<Edge> list = new ArrayList<>();
+        MyEdge e = new MyEdge(src, dst, weight);
+        ArrayList<MyEdge> list = new ArrayList<>();
         list.add(e);
         addE(list);
     }
 
-    public void addE(Collection<Edge> edges) throws ExecutionException, InterruptedException {
+    public void addE(Collection<MyEdge> edges) throws ExecutionException, InterruptedException {
         addE(edges, false);
     }
 
-    public void addE(Collection<Edge> edges, boolean check) throws ExecutionException, InterruptedException {
+    public void addE(Collection<MyEdge> edges, boolean check) throws ExecutionException, InterruptedException {
         if (check) {
             Set<String> vids = new HashSet<>();
-            for (Edge e : edges) {
+            for (MyEdge e : edges) {
                 vids.add(e.getSrc());
                 vids.add(e.getDst());
             }
@@ -143,12 +137,12 @@ public class SerialGraphLoader {
                 ".addE('%s').to(V().has(label, '%s').has('name','%s'))" +
                 ".property('weight', (Double)%f)";
         StringBuilder command = new StringBuilder("g");
-        for(Edge e:edges) {
+        for(MyEdge e:edges) {
             command.append(String.format(addEdgeTemplate, vertexLabel, e.getSrc(),
                     edgeLabel,
                     vertexLabel, e.getDst(), e.getWeight()));
         }
-        command.append(".iterate();[]");
+        command.append(".iterate()");
         submitCommand(command.toString()).one();
     }
 
@@ -213,8 +207,8 @@ public class SerialGraphLoader {
 
 
     public static void main(String args[]) throws Exception {
-        //SerialGraphLoader loader = new SerialGraphLoader("localhost", 8182, "testG");
-        SerialGraphLoader loader = new SerialGraphLoader(new File("/home/wzk/workspace/PASAGraphProcessingSystem/BridgeToPASAUnifiedPlatform/TinkerpopGraphClient/conf/test-remote.yaml"), "testG");
+        //GremlinServerClient loader = new GremlinServerClient("localhost", 8182, "testG");
+        GremlinServerClient loader = new GremlinServerClient(new File("/home/wzk/workspace/PASAGraphProcessingSystem/BridgeToPASAUnifiedPlatform/TinkerpopGraphClient/conf/test-remote.yaml"), "testG");
         loader.clearVertices();
         System.out.println(loader.getNumOfV());
         List<String> vnames = new ArrayList<String>();
@@ -223,10 +217,10 @@ public class SerialGraphLoader {
         System.out.println(loader.getNumOfV());
         loader.clearEdges();
         System.out.println(loader.getNumofE());
-        List<Edge> edges = new ArrayList<>();
-        edges.add(new Edge("a","b", 1.0));
-        edges.add(new Edge("b","c", 2.0));
-        edges.add(new Edge("c","a", 3.0));
+        List<MyEdge> edges = new ArrayList<>();
+        edges.add(new MyEdge("a","b", 1.0));
+        edges.add(new MyEdge("b","c", 2.0));
+        edges.add(new MyEdge("c","a", 3.0));
         loader.addE(edges);
         System.out.println(loader.getNumofE());
         loader.close();

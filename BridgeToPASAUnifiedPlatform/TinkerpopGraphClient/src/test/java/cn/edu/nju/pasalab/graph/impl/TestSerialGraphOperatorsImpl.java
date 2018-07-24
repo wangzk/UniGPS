@@ -73,4 +73,29 @@ public class TestSerialGraphOperatorsImpl {
         System.out.println(output);
     }
 
+    @Test
+    public void testGopCSVFileToGryoGraphSerial() throws Exception {
+        String demoDir = "dist/demo/jinyong";
+        String outputGryoFile = "jinyong.kryo";
+        ArrayList<String> weight = new ArrayList<>();
+        weight.add("weight");
+        SerialGraphOperatorsImpl.GopCSVFileToGryoGraphSingleClient(demoDir, "p1", "p2",
+                weight, false, outputGryoFile);
+    }
+    @Test
+    public void testGopGryoGraphVertexToCSVFileSingleClient() throws Exception {
+        String inputGryoFile = "jinyong.cluster.kryo";
+        String outputDir = "jinyong.csv";
+        ArrayList<String> properties = new ArrayList<>();
+        properties.add("cluster");
+        SerialGraphOperatorsImpl.GopGryoGraphVertexToCSVFileSingleClient(inputGryoFile, properties, outputDir);
+    }
+
+    @Test
+    public void testGopLabelPropagationGryoToGryoSingleClient() throws Exception {
+        String inputGryoFile = "jinyong.kryo";
+        String outputGryoFile = "jinyong.cluster.kryo";
+        SerialGraphOperatorsImpl.GopLabelPropagationGryoToGryoSingleClient(inputGryoFile, outputGryoFile, "cluster");
+    }
+
 }

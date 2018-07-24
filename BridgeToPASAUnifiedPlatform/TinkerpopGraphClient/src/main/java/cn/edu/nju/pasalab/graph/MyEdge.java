@@ -3,18 +3,18 @@ package cn.edu.nju.pasalab.graph;
 /**
  * The data structure to represent a weighted edge.
  */
-final public class Edge {
+final public class MyEdge {
 
     private String src;
     private String dst;
     private Double weight;
-    public Edge(String src, String dst, double weight) {
+    public MyEdge(String src, String dst, double weight) {
         this.setSrc(src);
         this.setDst(dst);
         this.setWeight(weight);
     }
 
-    public Edge(String src, String dst) {
+    public MyEdge(String src, String dst) {
         this.setSrc(src);
         this.setDst(dst);
         this.setWeight(1.0);
