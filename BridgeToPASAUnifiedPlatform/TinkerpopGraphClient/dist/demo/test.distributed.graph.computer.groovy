@@ -1,4 +1,4 @@
-hdfsGraph = GraphFactory.open('my/outg.prop')
+hdfsGraph = GraphFactory.open('my/SparkGraphComputerConf.properties')
 janusGraph = 'my/janusgraph-cassandra.properties'
 blvp = BulkLoaderVertexProgram.build().keepOriginalIds(false).writeGraph(janusGraph).create(hdfsGraph)
 hdfsGraph.compute(SparkGraphComputer).workers(4).program(blvp).submit().get()
