@@ -1,15 +1,19 @@
-package cn.edu.nju.pasalab.graph.impl;
+package cn.edu.nju.pasalab.graph.impl.util;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 
 public class CSVUtils {
-    public static class CSVSchema {
+    public static class CSVSchema implements Serializable {
         public enum PropertyType {STRING, INT, DOUBLE};
 
         public Map<String, PropertyType> getColumnType() {
@@ -29,6 +33,11 @@ public class CSVUtils {
         }
 
 
+        /**
+         * Load the CSV Schema from HDFS file
+         * @param csvSchemaFilePath
+         * @throws IOException
+         */
         public CSVSchema(Path csvSchemaFilePath) throws IOException {
             FileSystem fs = HDFSUtils.getFS(csvSchemaFilePath.toString());
             FSDataInputStream schemaStream = fs.open(csvSchemaFilePath);
@@ -98,6 +107,27 @@ public class CSVUtils {
 
         public String toString() {
             return "CSV Schema:" + toSchemaDescription();
+        }
+
+        public Map<String,Object> parseCSVLine(String line) throws IOException {
+            Map<String, Object> propertyMap = new HashMap<>();
+            CSVRecord record = CSVParser.parse(line, CSVFormat.RFC4180).iterator().next();
+            for (int i = 0; i < columnNames.length; i++) {
+                String columnName = columnNames[i];
+                PropertyType type = columnType.get(columnName);
+                switch (type) {
+                    case DOUBLE:
+                        propertyMap.put(columnName, new Double(record.get(i)));
+                        break;
+                    case STRING:
+                        propertyMap.put(columnName, record.get(i));
+                        break;
+                    case INT:
+                        propertyMap.put(columnName, new Integer(record.get(i)));
+                        break;
+                }
+            }
+            return propertyMap;
         }
     }
 }

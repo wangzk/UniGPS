@@ -2,6 +2,7 @@ package cn.edu.nju.pasalab.graph.impl;
 
 import cn.edu.nju.pasalab.graph.GraphOperators;
 import cn.edu.nju.pasalab.graph.SerialGraphOperators;
+import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;

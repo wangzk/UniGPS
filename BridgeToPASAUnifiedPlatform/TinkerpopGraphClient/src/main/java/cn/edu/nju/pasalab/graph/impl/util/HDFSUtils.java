@@ -1,6 +1,7 @@
-package cn.edu.nju.pasalab.graph.impl;
+package cn.edu.nju.pasalab.graph.impl.util;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileUtil;
@@ -46,5 +47,11 @@ public class HDFSUtils {
 
     public static boolean deleteLocalTmpFile(File tmpFile) throws IOException {
         return tmpFile.delete();
+    }
+
+    public static FSDataInputStream openFile(String file) throws IOException {
+        Path filePath = new Path(file);
+        FileSystem fs = getFS(file);
+        return fs.open(filePath);
     }
 }

@@ -1,8 +1,8 @@
 package cn.edu.nju.pasalab.graph.impl;
 
+import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -13,8 +13,10 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.tinkerpop.gremlin.hadoop.Constants;
 import org.apache.tinkerpop.gremlin.hadoop.structure.HadoopGraph;
 import org.apache.tinkerpop.gremlin.hadoop.structure.io.VertexWritable;
+import org.apache.tinkerpop.gremlin.hadoop.structure.io.graphson.GraphSONInputFormat;
 import org.apache.tinkerpop.gremlin.process.computer.bulkloading.BulkLoaderVertexProgram;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
@@ -22,7 +24,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.spark.process.computer.SparkGraphComputer;
 import org.apache.tinkerpop.gremlin.spark.structure.io.InputFormatRDD;
 import org.apache.tinkerpop.gremlin.spark.structure.io.InputRDD;
-import org.apache.tinkerpop.gremlin.spark.structure.io.InputRDDFormat;
 import org.apache.tinkerpop.gremlin.spark.structure.io.OutputFormatRDD;
 import org.apache.tinkerpop.gremlin.structure.*;
 import org.apache.tinkerpop.gremlin.structure.io.gryo.GryoReader;
@@ -40,7 +41,6 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -159,6 +159,25 @@ public class TestGryoFormat implements Serializable {
     }
 
     @Test
+    public void testGraphSONFormat() {
+        BaseConfiguration configuration = new BaseConfiguration();
+        configuration.setProperty("gremlin.graph", HadoopGraph.class.getName());
+        configuration.setProperty(Constants.GREMLIN_HADOOP_GRAPH_READER, GraphSONInputFormat.class.getName());
+        configuration.setProperty(Constants.GREMLIN_HADOOP_INPUT_LOCATION, "dist/demo/jinyong.gryo");
+        HadoopGraph graph = HadoopGraph.open(configuration);
+        System.out.println(graph);
+        System.out.println(graph.traversal().V().count().next());
+        System.out.println(graph.traversal().E().count().next());
+        printGraph(graph);
+
+    }
+
+    @Test
+    public void getClassName() {
+        System.out.println(HadoopGraph.class.getName());
+    }
+
+    @Test
     public void testTwoSplitWrite() throws IOException {
         File f = new File("f");
         if (f.exists()) f.delete();
@@ -167,8 +186,8 @@ public class TestGryoFormat implements Serializable {
         sg1.addVertex(T.id, 1 , T.label, "v", "name", "v1");
         StarGraph.StarVertex c1v1 = sg1.getStarVertex();
         c1v1.property("name", "v1");
-        Vertex c1v2 = sg1.addVertex(T.id, 2,T.label, "v", "name", "v2");
-        Vertex c1v3 = sg1.addVertex(T.id, 3, T.label, "v", "name", "v3");
+        Vertex c1v2 = sg1.addVertex(T.id, 2,T.label, "v");
+        Vertex c1v3 = sg1.addVertex(T.id, 3, T.label, "v");
         Edge c1e1 = c1v1.addEdge("e", c1v2, T.id, 1);
         Edge c1e2 = c1v1.addEdge("e", c1v3, T.id, 2);
         c1v2.addEdge("e", c1v1, T.id, 3);
@@ -176,14 +195,14 @@ public class TestGryoFormat implements Serializable {
         printGraph(sg1);
         StarGraph sg2 = StarGraph.builder().build();
         Vertex c2v2 = sg2.addVertex(T.id, 2, T.label, "v", "name", "v2");
-        Vertex c2v1 = sg2.addVertex(T.id, 1, T.label, "v", "name", "v1");
+        Vertex c2v1 = sg2.addVertex(T.id, 1, T.label, "v");
         Edge c2e1 = c2v2.addEdge("e", c2v1, T.id, 3);
         c2v1.addEdge("e", c2v2,T.id, 1);
         System.out.println(sg2);
         printGraph(sg2);
         StarGraph sg3 = StarGraph.builder().build();
         Vertex c3v3 = sg3.addVertex(T.id, 3, T.label, "v", "name", "v3");
-        Vertex c3v1 = sg3.addVertex(T.id, 1, T.label, "v", "name", "v1");
+        Vertex c3v1 = sg3.addVertex(T.id, 1, T.label, "v");
         c3v1.addEdge("e", c3v3, T.id, 2);
 
         SparkConf conf = new SparkConf().setMaster("local[2]").setAppName("test");

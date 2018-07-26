@@ -43,7 +43,12 @@ public class GraphOperators {
     public static final String ARG_EDGE_PROPERTY_COLUMNS = "edgePropertyColumns";
     public static final String ARG_OUTPUT_GRAPH_TYPE = "outputGraphType";
     public static final String ARG_OUTPUT_GRAPH_CONF_FILE = "outputGraphConfFile";
+    public static final String ARG_INPUT_GRAPH_TYPE = "inputGraphType";
+    public static final String ARG_INPUT_GRAPH_CONF_FILE = "inputGraphConfFile";
     public static final String ARG_RUNMODE = "runMode";
+    public static final String ARG_GRAPH_COMPUTER_CONF_FILE =  "graphComputerConfFile";
+    public static final String ARG_PROPERTY_NAMES = "propertyNames";
+    public static final String ARG_OUTPUT_VERTEX_CSV_FILE_PATH = "outputVertexCSVFilePath";
 
     public void GopCSVFileToGraph(Map<String, Object> arguments) throws Exception {
         String edgeCSVFilePath = (String)arguments.get(ARG_EDGE_CSV_FILE_PATH);
