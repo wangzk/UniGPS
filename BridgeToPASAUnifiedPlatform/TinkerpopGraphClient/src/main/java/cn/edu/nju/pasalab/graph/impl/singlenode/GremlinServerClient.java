@@ -1,4 +1,4 @@
-package cn.edu.nju.pasalab.graph.impl;
+package cn.edu.nju.pasalab.graph.impl.singlenode;
 
 import cn.edu.nju.pasalab.graph.MyEdge;
 import org.apache.tinkerpop.gremlin.driver.Client;

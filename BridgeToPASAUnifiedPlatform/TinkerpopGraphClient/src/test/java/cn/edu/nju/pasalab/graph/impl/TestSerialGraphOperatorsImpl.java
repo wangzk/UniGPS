@@ -1,7 +1,7 @@
 package cn.edu.nju.pasalab.graph.impl;
 
-import cn.edu.nju.pasalab.graph.GraphOperators;
-import cn.edu.nju.pasalab.graph.SerialGraphOperators;
+import cn.edu.nju.pasalab.graph.Constants;
+import cn.edu.nju.pasalab.graph.impl.singlenode.SerialGraphOperatorsImpl;
 import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -42,8 +42,8 @@ public class TestSerialGraphOperatorsImpl {
         String remoteConfFile = "/home/wzk/workspace/PASAGraphProcessingSystem/BridgeToPASAUnifiedPlatform/TinkerpopGraphClient/conf/test-remote.yaml";
         Map<String, Object> output =
         SerialGraphOperatorsImpl.GopCSVFileToTinkerGraphSerial(csvFile, testGraphName, remoteConfFile, "src", "dst", "weight", true, true);
-        System.out.println("Num V:" + output.get(GraphOperators.ARG_NUMBER_OF_VERTICES));
-        System.out.println("Num E:" + output.get(GraphOperators.ARG_NUMBER_OF_EDGES));
+        System.out.println("Num V:" + output.get(Constants.ARG_NUMBER_OF_VERTICES));
+        System.out.println("Num E:" + output.get(Constants.ARG_NUMBER_OF_EDGES));
     }
 
     @Test
@@ -56,8 +56,8 @@ public class TestSerialGraphOperatorsImpl {
                 SerialGraphOperatorsImpl.GopVertexPropertiesToCSVFileSerial(testGraphName, remoteConfFile, csvFile, properties,true);
         printFileContent(csvFile);
         HDFSUtils.getDefaultFS().delete(new Path(csvFile), true);
-        System.out.println(output.get(SerialGraphOperators.ARG_NUMBER_OF_LINES));
-        System.out.println(output.get(SerialGraphOperators.ARG_FILE_SIZE));
+        System.out.println(output.get(Constants.ARG_NUMBER_OF_LINES));
+        System.out.println(output.get(Constants.ARG_FILE_SIZE));
     }
 
     @Test

@@ -1,7 +1,7 @@
-package cn.edu.nju.pasalab.graph.impl;
+package cn.edu.nju.pasalab.graph.impl.singlenode;
 
+import cn.edu.nju.pasalab.graph.Constants;
 import cn.edu.nju.pasalab.graph.MyEdge;
-import cn.edu.nju.pasalab.graph.GraphOperators;
 import cn.edu.nju.pasalab.graph.impl.util.CSVUtils;
 import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
 import org.apache.commons.csv.CSVFormat;
@@ -101,8 +101,8 @@ public class SerialGraphOperatorsImpl {
         long numV = loader.getNumOfV();
         long numE = loader.getNumofE();
         Map<String, Object> output = new HashMap<>();
-        output.put(GraphOperators.ARG_NUMBER_OF_VERTICES, new Long(numV));
-        output.put(GraphOperators.ARG_NUMBER_OF_EDGES, new Long(numE));
+        output.put(Constants.ARG_NUMBER_OF_VERTICES, new Long(numV));
+        output.put(Constants.ARG_NUMBER_OF_EDGES, new Long(numE));
         loader.close();
         return output;
     }
@@ -142,8 +142,8 @@ public class SerialGraphOperatorsImpl {
         logger.info("Done!");
         long fileSize = fs.getFileStatus(new Path(csvFile)).getLen();
         Map<String, Object> output = new HashMap<>();
-        output.put(GraphOperators.ARG_NUMBER_OF_LINES, numberOfLines);
-        output.put(GraphOperators.ARG_FILE_SIZE, fileSize);
+        output.put(Constants.ARG_NUMBER_OF_LINES, numberOfLines);
+        output.put(Constants.ARG_FILE_SIZE, fileSize);
         loader.close();
         return output;
     }
@@ -157,9 +157,9 @@ public class SerialGraphOperatorsImpl {
         Map<String, Double> topRanks = loader.pageRank(resultPropertyName, returnTop);
         long t1 = System.currentTimeMillis();
         Map<String, Object> output = new HashMap<>();
-        output.put(GraphOperators.ARG_ELAPSED_TIME, (t1 - t0));
+        output.put(Constants.ARG_ELAPSED_TIME, (t1 - t0));
         if (returnTop > 0)
-            output.put(GraphOperators.ARG_TOP_VERTICES, topRanks);
+            output.put(Constants.ARG_TOP_VERTICES, topRanks);
         loader.close();
         return output;
     }
@@ -172,8 +172,8 @@ public class SerialGraphOperatorsImpl {
         long clusterCount = loader.peerPressure(resultPropertyName);
         long t1 = System.currentTimeMillis();
         Map<String, Object> output = new HashMap<>();
-        output.put(GraphOperators.ARG_ELAPSED_TIME, (t1 - t0));
-        output.put(GraphOperators.ARG_NUMBER_OF_CLUSTERS, clusterCount);
+        output.put(Constants.ARG_ELAPSED_TIME, (t1 - t0));
+        output.put(Constants.ARG_NUMBER_OF_CLUSTERS, clusterCount);
         loader.close();
         return output;
     }
