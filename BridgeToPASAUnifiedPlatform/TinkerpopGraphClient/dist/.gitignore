@@ -1,8 +1,0 @@
-third-party
-tmp-deploy
-.vscode
-*.pyc
-db
-log
-*demo.output.*
-jar
