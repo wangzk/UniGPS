@@ -1,5 +1,6 @@
 package cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer;
 
+import cn.edu.nju.pasalab.graph.impl.util.ArgumentUtils;
 import cn.edu.nju.pasalab.graph.impl.util.CSVUtils;
 import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
 import org.apache.commons.configuration.BaseConfiguration;
@@ -27,22 +28,23 @@ import java.util.Map;
 
 public class GopCSVFileToGraph {
 
-    public static void toGraphSON(Map<String, Object> arguments) throws Exception {
+    public static void toGraphSON(Map<String, String> arguments) throws Exception {
         ////////// Arguments
-        String edgeCSVFilePath = (String)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_EDGE_CSV_FILE_PATH);
-        String edgeSrcColumn = (String)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_EDGE_SRC_COLUMN);
-        String edgeDstColumn = (String)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_EDGE_DST_COLUMN);
-        Boolean directed = (Boolean)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_DIRECTED);
-        List<String> edgePropertyColumns = (List<String>)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_EDGE_PROPERTY_COLUMNS);
+        String edgeCSVFilePath = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_EDGE_CSV_FILE_PATH);
+        String edgeSrcColumn = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_EDGE_SRC_COLUMN);
+        String edgeDstColumn = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_EDGE_DST_COLUMN);
+        Boolean directed = Boolean.valueOf(arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_DIRECTED));
+        List<String> edgePropertyColumns =
+                ArgumentUtils.toList(arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_EDGE_PROPERTY_COLUMNS));
         // For GraphSON, the conf file path is also the output file path.
-        String outputFilePath = (String)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_OUTPUT_GRAPH_CONF_FILE);
+        String outputFilePath = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_OUTPUT_GRAPH_CONF_FILE);
         // For Hadoop graph computer, the graph computer file is the run mode conf file
-        String graphComputerConfFile = (String)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_RUNMODE_CONF_FILE);
+        String graphComputerConfFile = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_RUNMODE_CONF_FILE);
 
         ///////// Input file
         Path edgeCSVFileHDFSPath = new Path(edgeCSVFilePath);
-        Path dataFilePath = new Path(edgeCSVFileHDFSPath, "data.csv");
-        Path schemaFilePath = new Path(edgeCSVFileHDFSPath, "schema");
+        Path dataFilePath = new Path(edgeCSVFileHDFSPath, cn.edu.nju.pasalab.graph.Constants.CSV_DATA_FILE_NAME);
+        Path schemaFilePath = new Path(edgeCSVFileHDFSPath, cn.edu.nju.pasalab.graph.Constants.CSV_SCHEMA_FILE_NAME);
         if (!edgePropertyColumns.contains(edgeSrcColumn)) {
             edgePropertyColumns.add(0, edgeSrcColumn);
         }

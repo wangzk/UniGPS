@@ -1,6 +1,7 @@
 package cn.edu.nju.pasalab.graph.demo;
 
 import cn.edu.nju.pasalab.graph.Constants;
+import cn.edu.nju.pasalab.graph.GraphOperators;
 import cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer.Common;
 import cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer.GopCSVFileToGraph;
 import cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer.GopLabelPropagation;
@@ -21,45 +22,51 @@ public class DistributedGraphOp {
         this.graphComputerConfFile = graphComputerConfFile;
     }
 
-    public void testCSVToGryoFileSpark() throws Exception {
-        Map<String, Object> arguments = new HashMap<>();
+    public void testGopCSVFileToGraph() throws Exception {
+        Map<String, String> arguments = new HashMap<>();
         arguments.put(Constants.ARG_EDGE_CSV_FILE_PATH, inputCSVFile);
         arguments.put(Constants.ARG_EDGE_SRC_COLUMN, "p1");
         arguments.put(Constants.ARG_EDGE_DST_COLUMN, "p2");
-        arguments.put(Constants.ARG_DIRECTED, Boolean.FALSE);
+        arguments.put(Constants.ARG_DIRECTED, "false");
+        arguments.put(Constants.ARG_OUTPUT_GRAPH_TYPE, Constants.GRAPHTYPE_GRAPHSON);
         arguments.put(Constants.ARG_OUTPUT_GRAPH_CONF_FILE, inputCSVFile + ".graph");
+        arguments.put(Constants.ARG_RUNMODE, Constants.RUNMODE_HADOOP_GRAPH_COMPUTER);
         arguments.put(Constants.ARG_RUNMODE_CONF_FILE, graphComputerConfFile);
-        List<String> properties = new ArrayList<>();
-        properties.add("weight");
-        arguments.put(Constants.ARG_EDGE_PROPERTY_COLUMNS, properties);
-        GopCSVFileToGraph.toGraphSON(arguments);
+        arguments.put(Constants.ARG_EDGE_PROPERTY_COLUMNS, "weight");
+        GraphOperators graphOperators = new GraphOperators();
+        graphOperators.GopCSVFileToGraph(arguments);
     }
 
 
-    public void testGryoPeerPressure() throws Exception {
-        Map<String, Object> arguments = new HashMap<>();
+    public void testGopLabelPropagation() throws Exception {
+        Map<String, String> arguments = new HashMap<>();
+        arguments.put(Constants.ARG_INPUT_GRAPH_TYPE, Constants.GRAPHTYPE_GRAPHSON);
         arguments.put(Constants.ARG_INPUT_GRAPH_CONF_FILE, inputCSVFile + ".graph");
-        arguments.put(Constants.ARG_OUTPUT_GRAPH_CONF_FILE, inputCSVFile + ".afterpr");
         arguments.put(Constants.ARG_RESULT_PROPERTY_NAME, "clusterID");
+        arguments.put(Constants.ARG_RUNMODE, Constants.RUNMODE_HADOOP_GRAPH_COMPUTER);
         arguments.put(Constants.ARG_RUNMODE_CONF_FILE, graphComputerConfFile);
-        GopLabelPropagation.fromGraphSONToGraphSON(arguments);
+        arguments.put(Constants.ARG_OUTPUT_GRAPH_TYPE, Constants.GRAPHTYPE_GRAPHSON);
+        arguments.put(Constants.ARG_OUTPUT_GRAPH_CONF_FILE, inputCSVFile + ".afterpr");
+        GraphOperators graphOperators = new GraphOperators();
+        graphOperators.GopLabelPropagation(arguments);
     }
 
-    public void testGryoGraphVertexToCSVFile() throws Exception {
-        Map<String, Object> arguments = new HashMap<>();
+    public void testGopVertexPropertiesToCSVFile() throws Exception {
+        Map<String, String> arguments = new HashMap<>();
+        arguments.put(Constants.ARG_INPUT_GRAPH_TYPE, Constants.GRAPHTYPE_GRAPHSON);
         arguments.put(Constants.ARG_INPUT_GRAPH_CONF_FILE, inputCSVFile + ".afterpr");
-        List<String> properties = new ArrayList<>();
-        properties.add("clusterID");
-        arguments.put(Constants.ARG_PROPERTIES, properties);
+        arguments.put(Constants.ARG_PROPERTY_NAMES, "clusterID");
         arguments.put(Constants.ARG_OUTPUT_VERTEX_CSV_FILE_PATH, inputCSVFile + ".out");
+        arguments.put(Constants.ARG_RUNMODE, Constants.RUNMODE_HADOOP_GRAPH_COMPUTER);
         arguments.put(Constants.ARG_RUNMODE_CONF_FILE, graphComputerConfFile);
-        GopVertexPropertiesToCSVFile.fromGraphSON(arguments);
+        GraphOperators graphOperators = new GraphOperators();
+        graphOperators.GopVertexPropertiesToCSVFile(arguments);
     }
 
     public void run() throws Exception {
-        testCSVToGryoFileSpark();
-        testGryoPeerPressure();
-        testGryoGraphVertexToCSVFile();
+        testGopCSVFileToGraph();
+        testGopLabelPropagation();
+        testGopVertexPropertiesToCSVFile();
     }
 
     public static void main(String args[]) throws Exception {

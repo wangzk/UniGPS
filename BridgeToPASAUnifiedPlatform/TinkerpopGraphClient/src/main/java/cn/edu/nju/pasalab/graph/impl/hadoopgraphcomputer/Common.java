@@ -7,6 +7,8 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
+import org.apache.tinkerpop.gremlin.hadoop.Constants;
+import org.apache.tinkerpop.gremlin.spark.process.computer.SparkGraphComputer;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -41,6 +43,11 @@ public class Common {
         public ManageSparkContexts(String graphComputerConfFile, String appName) throws IOException, ConfigurationException {
 
             Configuration graphComputerConf = ConfUtils.loadConfFromHDFS(graphComputerConfFile);
+            if (!graphComputerConf.getString(Constants.GREMLIN_HADOOP_DEFAULT_GRAPH_COMPUTER)
+                    .equals(SparkGraphComputer.class.getName())) {
+                // If this is not a Spark graph computer configuration file
+                throw new ConfigurationException("Only SparkGraphComputer is allowed to initialize the Spark context.");
+            };
             SparkConf sparkConf = new SparkConf(true);
             sparkConf.setAppName(appName);
             ConfUtils.loadUserConfToSparkConf(sparkConf, graphComputerConf);

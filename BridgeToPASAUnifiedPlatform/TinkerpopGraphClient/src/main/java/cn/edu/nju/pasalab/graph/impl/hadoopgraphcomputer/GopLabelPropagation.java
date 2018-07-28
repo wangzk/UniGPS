@@ -19,11 +19,11 @@ import static cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer.Common.GREMLIN_T
 
 public class GopLabelPropagation {
 
-    public static void fromGraphSONToGraphSON(Map<String, Object> arguments) throws Exception {
-        String inputGraphPath = (String)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_INPUT_GRAPH_CONF_FILE);
-        String outputGraphPath = (String)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_OUTPUT_GRAPH_CONF_FILE);
-        String resultPropertyName = (String)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_RESULT_PROPERTY_NAME);
-        String graphComputerConfPath = (String)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_RUNMODE_CONF_FILE);
+    public static void fromGraphSONToGraphSON(Map<String, String> arguments) throws Exception {
+        String inputGraphPath = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_INPUT_GRAPH_CONF_FILE);
+        String outputGraphPath = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_OUTPUT_GRAPH_CONF_FILE);
+        String resultPropertyName = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_RESULT_PROPERTY_NAME);
+        String graphComputerConfPath = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_RUNMODE_CONF_FILE);
         FileSystem fs = HDFSUtils.getFS(outputGraphPath);
         fs.delete(new Path(outputGraphPath), true);
         Configuration graphComputerConf = ConfUtils.loadConfFromHDFS(graphComputerConfPath);

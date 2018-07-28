@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public class GraphOperators {
 
-    public void GopCSVFileToGraph(Map<String, Object> arguments) throws Exception {
+    public void GopCSVFileToGraph(Map<String, String> arguments) throws Exception {
         String outputGraphType = (String)arguments.get(Constants.ARG_OUTPUT_GRAPH_TYPE);
         String runMode = (String)arguments.get(Constants.ARG_RUNMODE);
         /////// Determine run mode.
@@ -21,7 +21,7 @@ public class GraphOperators {
         }
     }
 
-    public void GopVertexPropertiesToCSVFile(Map<String, Object> arguments) throws Exception {
+    public void GopVertexPropertiesToCSVFile(Map<String, String> arguments) throws Exception {
         String inputGraphType = (String)arguments.get(Constants.ARG_INPUT_GRAPH_TYPE);
         String runMode = (String)arguments.get(Constants.ARG_RUNMODE);
         /////// Determine run mode.
@@ -33,7 +33,7 @@ public class GraphOperators {
         }
     }
 
-    public void GopLabelPropagation(Map<String, Object> arguments) throws Exception {
+    public void GopLabelPropagation(Map<String, String> arguments) throws Exception {
         String inputGraphType = (String)arguments.get(Constants.ARG_INPUT_GRAPH_TYPE);
         String runMode = (String)arguments.get(Constants.ARG_RUNMODE);
         /////// Determine run mode.

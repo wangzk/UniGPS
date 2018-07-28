@@ -40,4 +40,8 @@ public class Constants {
     public static final String ARG_RUNMODE_CONF_FILE =  "runModeConfFile";
     public static final String ARG_PROPERTY_NAMES = "propertyNames";
     public static final String ARG_OUTPUT_VERTEX_CSV_FILE_PATH = "outputVertexCSVFilePath";
+
+    public static final String CSV_DATA_FILE_NAME = "data.csv";
+    public static final String CSV_SCHEMA_FILE_NAME = "schema";
+
 }

@@ -1,5 +1,6 @@
 package cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer;
 
+import cn.edu.nju.pasalab.graph.impl.util.ArgumentUtils;
 import cn.edu.nju.pasalab.graph.impl.util.CSVUtils;
 import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
 import org.apache.commons.configuration.BaseConfiguration;
@@ -27,18 +28,19 @@ import static cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer.Common.GREMLIN_G
 
 public class GopVertexPropertiesToCSVFile {
 
-    public static void fromGraphSON(Map<String, Object> arguments) throws Exception {
+    public static void fromGraphSON(Map<String, String> arguments) throws Exception {
         //////////// Arguments
         // For Gryo graph file, the conf path is the graph file path
-        String inputGraphFilePath = (String)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_INPUT_GRAPH_CONF_FILE);
-        List<String> properties = (List<String>)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_PROPERTIES);
-        String outputCSVFilePath = (String)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_OUTPUT_VERTEX_CSV_FILE_PATH);
-        String graphComputerConfFile = (String)arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_RUNMODE_CONF_FILE);
+        String inputGraphFilePath = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_INPUT_GRAPH_CONF_FILE);
+        List<String> properties =
+                ArgumentUtils.toList(arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_PROPERTY_NAMES));
+        String outputCSVFilePath = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_OUTPUT_VERTEX_CSV_FILE_PATH);
+        String graphComputerConfFile = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_RUNMODE_CONF_FILE);
 
         /////////// Prepare output
         Path outputDirPath = new Path(outputCSVFilePath);
-        Path schemaFilePath = new Path(outputDirPath, "schema");
-        Path dataFilePath = new Path(outputDirPath, "data.csv");
+        Path schemaFilePath = new Path(outputDirPath, cn.edu.nju.pasalab.graph.Constants.CSV_SCHEMA_FILE_NAME);
+        Path dataFilePath = new Path(outputDirPath, cn.edu.nju.pasalab.graph.Constants.CSV_DATA_FILE_NAME);
         FileSystem fs = HDFSUtils.getFS(outputCSVFilePath);
         fs.delete(new Path(outputCSVFilePath), true);
         fs.mkdirs(new Path(outputCSVFilePath));
