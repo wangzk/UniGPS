@@ -3,6 +3,7 @@ package cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer;
 import cn.edu.nju.pasalab.graph.impl.util.ArgumentUtils;
 import cn.edu.nju.pasalab.graph.impl.util.CSVUtils;
 import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
+import cn.edu.nju.pasalab.graphx.ToGraphx;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -10,6 +11,8 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.graphx.EdgeRDD;
+import org.apache.spark.graphx.VertexRDD;
 import org.apache.tinkerpop.gremlin.hadoop.Constants;
 import org.apache.tinkerpop.gremlin.hadoop.structure.HadoopGraph;
 import org.apache.tinkerpop.gremlin.hadoop.structure.io.VertexWritable;
@@ -75,10 +78,12 @@ public class GopVertexPropertiesToCSVFile {
 
         InputRDD graphRDDInput = new InputFormatRDD();
         JavaPairRDD<Object, VertexWritable> vertexWritableJavaPairRDD = graphRDDInput.readGraphRDD(inputGraphConf, jsc);
+
         JavaRDD<String> csvLineRDD = vertexWritableJavaPairRDD.map(tuple2 -> {
             StarGraph.StarVertex v = tuple2._2.get();
             StarGraph g = StarGraph.of(v);
             StringBuilder csvLine = new StringBuilder();
+            csvLine.append("," + Long.parseLong(v.id().toString(), 19));
             for(String pName: properties) {
                 Object propertyValue = g.traversal().V(v.id()).values(pName).next();
                 CSVUtils.CSVSchema.PropertyType type = schema_b.getColumnType().get(pName);
@@ -96,8 +101,11 @@ public class GopVertexPropertiesToCSVFile {
             }
             return csvLine.substring(1);
         });
-
+        for(String line:csvLineRDD.collect()){
+            System.out.println("* "+line);
+        }
         csvLineRDD.saveAsTextFile(dataFilePath.toString());
+
         manageSparkContexts.stop();
     }
 }

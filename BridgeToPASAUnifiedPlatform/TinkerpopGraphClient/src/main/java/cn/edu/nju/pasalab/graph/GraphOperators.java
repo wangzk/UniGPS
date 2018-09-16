@@ -47,6 +47,15 @@ public class GraphOperators {
                         + inputGraphType + "/" + outputGraphType);
             }
 
+        } else if(runMode.equals(Constants.RUNMODE_GRAPHX)) {
+            String outputGraphType = (String)arguments.get(Constants.ARG_OUTPUT_GRAPH_TYPE);
+            if (inputGraphType.equals(Constants.GRAPHTYPE_GRAPHSON)
+                    && outputGraphType.equals(Constants.GRAPHTYPE_GRAPHSON)) {
+                cn.edu.nju.pasalab.graph.impl.graphx.GopLabelPropagation.fromGraphSONToGraphSON(arguments);
+            } else {
+                throw new UnsupportedOperationException("No implementation for input/output graph type combination:"
+                        + inputGraphType + "/" + outputGraphType);
+            }
         } else {
             throw new UnsupportedOperationException("No implementation for run mode:" + runMode);
         }

@@ -43,10 +43,10 @@ public class DistributedGraphOp {
         arguments.put(Constants.ARG_INPUT_GRAPH_TYPE, Constants.GRAPHTYPE_GRAPHSON);
         arguments.put(Constants.ARG_INPUT_GRAPH_CONF_FILE, inputCSVFile + ".graph");
         arguments.put(Constants.ARG_RESULT_PROPERTY_NAME, "clusterID");
-        arguments.put(Constants.ARG_RUNMODE, Constants.RUNMODE_HADOOP_GRAPH_COMPUTER);
+        arguments.put(Constants.ARG_RUNMODE, Constants.RUNMODE_GRAPHX);
         arguments.put(Constants.ARG_RUNMODE_CONF_FILE, graphComputerConfFile);
         arguments.put(Constants.ARG_OUTPUT_GRAPH_TYPE, Constants.GRAPHTYPE_GRAPHSON);
-        arguments.put(Constants.ARG_OUTPUT_GRAPH_CONF_FILE, inputCSVFile + ".afterpr");
+        arguments.put(Constants.ARG_OUTPUT_GRAPH_CONF_FILE, inputCSVFile + ".aftergraphxpr");
         GraphOperators graphOperators = new GraphOperators();
         graphOperators.GopLabelPropagation(arguments);
     }
@@ -64,14 +64,14 @@ public class DistributedGraphOp {
     }
 
     public void run() throws Exception {
-        testGopCSVFileToGraph();
+        //testGopCSVFileToGraph();
         testGopLabelPropagation();
-        testGopVertexPropertiesToCSVFile();
+        //testGopVertexPropertiesToCSVFile();
     }
 
     public static void main(String args[]) throws Exception {
-        String inputCSVFile = args[0];
-        String graphComputerPath = args[1];
+        String inputCSVFile = "/home/lijunhong/test.csv";
+        String graphComputerPath = "/home/lijunhong/IdeaProjects/GraphOperator/BridgeToPASAUnifiedPlatform/TinkerpopGraphClient/conf/graph-computer/SparkLocal.conf";
         DistributedGraphOp op = new DistributedGraphOp(inputCSVFile, graphComputerPath);
         op.run();
     }
