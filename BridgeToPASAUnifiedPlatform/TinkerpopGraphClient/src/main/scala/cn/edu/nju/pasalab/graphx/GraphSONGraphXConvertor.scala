@@ -37,6 +37,14 @@ class GraphSONGraphXConvertor extends Serializable {
     Math.abs(Hashing.sha256.hashString(id, Charsets.UTF_8).asLong())
   }
 
+  def hashEdgeID(src:String,dst:String,isOut:Boolean):Long = {
+    if(isOut){
+      Math.abs(Hashing.sha256.hashString(src+dst,Charsets.UTF_8).asLong())
+    }else{
+      Math.abs(Hashing.sha256.hashString(dst+src,Charsets.UTF_8).asLong())
+    }
+  }
+
   def getOrCreateVertexForStarGraph(graph:StarGraph, cache:util.HashMap[Long, Vertex],
                       name: Long,isStar: Boolean,
                       properties :util.HashMap[String, java.io.Serializable]):Vertex = {
@@ -91,15 +99,18 @@ class GraphSONGraphXConvertor extends Serializable {
                                                                 centerVertexName,true,centerVertexAttr)
         // Add adjacency edges
         adjs.get.map(edge => {
+
           val anotherVertexName = edge.dstId
           val edgeProperties = edge.attr
           val srcV = centerVertex
           val dstV :Vertex = getOrCreateVertexForStarGraph(graph,cache,anotherVertexName,false, null)
 
-          val outedge = srcV.addEdge(DEFAULT_EDGE_LABEL,dstV)
+          val outedgeID:lang.Long = hashEdgeID(edge.srcId.toString,edge.dstId.toString,true)
+          val outedge = srcV.addEdge(DEFAULT_EDGE_LABEL,dstV,T.id,outedgeID)
           if (outedge != null && edgeProperties.size > 0) addProperties(outedge, edgeProperties)
 
-          val inedge = dstV.addEdge(DEFAULT_EDGE_LABEL,srcV)
+          val inedgeID:lang.Long = hashEdgeID(edge.srcId.toString,edge.dstId.toString,false)
+          val inedge = dstV.addEdge(DEFAULT_EDGE_LABEL,srcV,T.id,inedgeID)
           if (inedge != null && edgeProperties.size > 0) addProperties(inedge, edgeProperties)
 
         })
@@ -170,14 +181,14 @@ class GraphSONGraphXConvertor extends Serializable {
         val md2 = convertStringIDToLongID(dstId)
         var edgeAttr = new util.HashMap[String,java.io.Serializable]()
         edgelist.get(x).properties().asScala.foreach((pro:Property[Nothing])=>
-         {edgeAttr.put(pro.key(),pro.value().toString)})
+        {edgeAttr.put(pro.key(),pro.value().toString)})
         list.append(graphx.Edge(md1,md2,edgeAttr))
       }
       list
     })
 
-
-    graphx.Graph[HashMap[String,java.io.Serializable],HashMap[String,java.io.Serializable]](vertex,edgeRDD,new HashMap[String,java.io.Serializable]())
+    val edge = edgeRDD.distinct()
+    graphx.Graph[HashMap[String,java.io.Serializable],HashMap[String,java.io.Serializable]](vertex,edge,new HashMap[String,java.io.Serializable]())
   }
 
 
