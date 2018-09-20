@@ -3,7 +3,6 @@ package cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer;
 import cn.edu.nju.pasalab.graph.impl.util.ArgumentUtils;
 import cn.edu.nju.pasalab.graph.impl.util.CSVUtils;
 import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
-import cn.edu.nju.pasalab.graphx.ToGraphx;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;

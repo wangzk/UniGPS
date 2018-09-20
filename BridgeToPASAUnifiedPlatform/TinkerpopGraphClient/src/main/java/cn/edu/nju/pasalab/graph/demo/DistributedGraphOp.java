@@ -64,13 +64,13 @@ public class DistributedGraphOp {
     }
 
     public void run() throws Exception {
-        testGopCSVFileToGraph();
+        //testGopCSVFileToGraph();
         testGopLabelPropagation();
-        testGopVertexPropertiesToCSVFile();
+        //testGopVertexPropertiesToCSVFile();
     }
 
     public static void main(String args[]) throws Exception {
-        String inputCSVFile = "/home/lijunhong/test.csv";
+        String inputCSVFile = "/home/lijunhong/jinyong.csv";
         String graphComputerPath = "/home/lijunhong/IdeaProjects/GraphOperator/BridgeToPASAUnifiedPlatform/TinkerpopGraphClient/conf/graph-computer/SparkLocal.conf";
         DistributedGraphOp op = new DistributedGraphOp(inputCSVFile, graphComputerPath);
         op.run();

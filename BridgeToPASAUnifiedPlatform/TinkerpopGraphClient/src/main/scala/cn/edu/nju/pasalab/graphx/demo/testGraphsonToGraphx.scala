@@ -19,11 +19,11 @@ object testGraphsonToGraphx {
     val manageSparkContexts = new Common.ManageSparkContexts(graphComputerPath, "GraphSON File to Graphx")
     val sc = manageSparkContexts.getSc
     val jsc = manageSparkContexts.getJsc
-    val gx = new GraphSONGraphXConverter
-    val result:Graph[util.HashMap[String,java.io.Serializable],util.HashMap[String,java.io.Serializable]] = gx.fromGraphSONToGraphX(sc,inputCSVFile)
+    val result:Graph[util.HashMap[String,java.io.Serializable],util.HashMap[String,java.io.Serializable]] =
+      GraphSONGraphXConverter.fromGraphSONToGraphX(sc,inputCSVFile)
     //result.edges.foreach(println)
     //result.triplets.foreach(println)
-    gx.fromGraphXToGraphSON(result,"/home/lijunhong/aftertrans.graph")
+    GraphSONGraphXConverter.fromGraphXToGraphSON(result,"/home/lijunhong/aftertrans.graph")
 
   }
 }

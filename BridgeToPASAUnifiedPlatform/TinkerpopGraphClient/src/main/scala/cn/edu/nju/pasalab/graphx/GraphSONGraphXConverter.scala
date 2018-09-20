@@ -27,7 +27,7 @@ import scala.collection.JavaConverters._
 
 
 
-class GraphSONGraphXConverter extends Serializable {
+object GraphSONGraphXConverter extends Serializable {
 
   val DEFAULT_VERTEX_LABEL = "SimpleV"
   val DEFAULT_EDGE_LABEL = "SimpleE"
