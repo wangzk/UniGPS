@@ -36,12 +36,8 @@ class GraphSONGraphXConverter extends Serializable {
     Math.abs(Hashing.sha256.hashString(id, Charsets.UTF_8).asLong())
   }
 
-  def hashEdgeID(src:String,dst:String,isOut:Boolean):Long = {
-    if (isOut) {
-      Math.abs(Hashing.sha256.hashString(src+dst,Charsets.UTF_8).asLong())
-    } else {
-      Math.abs(Hashing.sha256.hashString(dst+src,Charsets.UTF_8).asLong())
-    }
+  def hashEdgeID(src:String,dst:String):Long = {
+    Math.abs(Hashing.sha256.hashString(src+dst,Charsets.UTF_8).asLong())
   }
 
   def getOrCreateVertexForStarGraph(graph:StarGraph, cache:util.HashMap[Long, Vertex],
@@ -109,11 +105,11 @@ class GraphSONGraphXConverter extends Serializable {
           val dstV :Vertex = getOrCreateVertexForStarGraph(graph,cache,anotherVertexID,false, null)
 
           // For both direction, add an edge between the both vertices
-          val outedgeID:lang.Long = hashEdgeID(edge.srcId.toString,edge.dstId.toString,true)
+          val outedgeID:lang.Long = hashEdgeID(edge.srcId.toString,edge.dstId.toString)
           val outedge = srcV.addEdge(DEFAULT_EDGE_LABEL,dstV,T.id,outedgeID)
           if (outedge != null && edgeProperties.size > 0) addProperties(outedge, edgeProperties)
 
-          val inedgeID:lang.Long = hashEdgeID(edge.srcId.toString,edge.dstId.toString,false)
+          val inedgeID:lang.Long = hashEdgeID(edge.dstId.toString,edge.srcId.toString)
           val inedge = dstV.addEdge(DEFAULT_EDGE_LABEL,srcV,T.id,inedgeID)
           if (inedge != null && edgeProperties.size > 0) addProperties(inedge, edgeProperties)
         })

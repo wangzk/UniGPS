@@ -27,7 +27,7 @@ public class DistributedGraphOp {
         arguments.put(Constants.ARG_EDGE_CSV_FILE_PATH, inputCSVFile);
         arguments.put(Constants.ARG_EDGE_SRC_COLUMN, "p1");
         arguments.put(Constants.ARG_EDGE_DST_COLUMN, "p2");
-        arguments.put(Constants.ARG_DIRECTED, "false");
+        arguments.put(Constants.ARG_DIRECTED, "true");
         arguments.put(Constants.ARG_OUTPUT_GRAPH_TYPE, Constants.GRAPHTYPE_GRAPHSON);
         arguments.put(Constants.ARG_OUTPUT_GRAPH_CONF_FILE, inputCSVFile + ".graph");
         arguments.put(Constants.ARG_RUNMODE, Constants.RUNMODE_HADOOP_GRAPH_COMPUTER);
@@ -64,9 +64,9 @@ public class DistributedGraphOp {
     }
 
     public void run() throws Exception {
-        //testGopCSVFileToGraph();
+        testGopCSVFileToGraph();
         testGopLabelPropagation();
-        //testGopVertexPropertiesToCSVFile();
+        testGopVertexPropertiesToCSVFile();
     }
 
     public static void main(String args[]) throws Exception {

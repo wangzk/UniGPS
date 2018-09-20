@@ -13,7 +13,7 @@ import org.apache.spark.graphx.Graph
 
 object testGraphsonToGraphx {
   def main(args: Array[String]): Unit = {
-    val inputCSVFile = "/home/lijunhong/my-graph.json"
+    val inputCSVFile = "/home/lijunhong/jinyong.csv.graph"
     val graphComputerPath = "./conf/graph-computer/SparkLocal.conf"
 
     val manageSparkContexts = new Common.ManageSparkContexts(graphComputerPath, "GraphSON File to Graphx")

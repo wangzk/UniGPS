@@ -1,6 +1,8 @@
 package cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer;
 
 import cn.edu.nju.pasalab.graph.impl.util.ConfUtils;
+import com.google.common.base.Charsets;
+import com.google.common.hash.Hashing;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.spark.SparkConf;
@@ -95,6 +97,11 @@ public class Common {
                 return e;
             }
 
+            private Long createEdgeID(String src,String dst) {
+                String edge = src + dst;
+                return Math.abs(Hashing.sha256().hashString(edge, Charsets.UTF_8).asLong());
+            }
+
             StarGraph graph = StarGraph.open();
             HashMap<String, Vertex> cache = new HashMap<>();
 
@@ -110,12 +117,15 @@ public class Common {
                     if (direction == VertexDirection.SRC) {
                         Vertex srcV = getOrCreate(anotherVertexName);
                         Vertex dstV = centerVertex;
-                        edge = srcV.addEdge(DEFAULT_EDGE_LABEL, dstV);
+                        Long edgeID = createEdgeID(srcV.id().toString(),dstV.id().toString());
+                        edge = srcV.addEdge(DEFAULT_EDGE_LABEL, dstV,T.id,edgeID);
                     } else if (direction == VertexDirection.DST) {
                         Vertex srcV = centerVertex;
                         Vertex dstV = getOrCreate(anotherVertexName);
-                        edge = srcV.addEdge(DEFAULT_EDGE_LABEL, dstV);
+                        Long edgeID = createEdgeID(srcV.id().toString(),dstV.id().toString());
+                        edge = srcV.addEdge(DEFAULT_EDGE_LABEL, dstV,T.id,edgeID);
                     }
+
                     if (edge != null && properties.size() > 0) {
                         addProperties(edge, properties);
                     }
