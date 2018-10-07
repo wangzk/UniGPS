@@ -1,10 +1,7 @@
 package cn.edu.nju.pasalab.graph.impl.util;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.fs.*;
 import org.mortbay.util.IO;
 
 import java.io.File;
@@ -53,5 +50,10 @@ public class HDFSUtils {
         Path filePath = new Path(file);
         FileSystem fs = getFS(file);
         return fs.open(filePath);
+    }
+    public static FSDataOutputStream createFile(String file) throws IOException {
+        Path filePath = new Path(file);
+        FileSystem fs = getFS(file);
+        return fs.create(filePath);
     }
 }

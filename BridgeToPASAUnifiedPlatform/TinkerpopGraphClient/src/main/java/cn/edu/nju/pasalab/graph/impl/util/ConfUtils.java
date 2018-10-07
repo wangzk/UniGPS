@@ -7,6 +7,7 @@ import org.apache.spark.SparkConf;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public class ConfUtils {
 
@@ -16,6 +17,12 @@ public class ConfUtils {
         conf.load(fileStream);
         fileStream.close();
         return conf;
+    }
+
+    public static void saveConfToHDFS(PropertiesConfiguration conf,String hdfsFilePath) throws IOException, ConfigurationException {
+        OutputStream fileStream = HDFSUtils.createFile(hdfsFilePath);
+        conf.save(fileStream);
+        fileStream.close();
     }
 
     public static PropertiesConfiguration loadExtraConfFromHDFS(PropertiesConfiguration conf, String hdfsFilePath) throws IOException, ConfigurationException {

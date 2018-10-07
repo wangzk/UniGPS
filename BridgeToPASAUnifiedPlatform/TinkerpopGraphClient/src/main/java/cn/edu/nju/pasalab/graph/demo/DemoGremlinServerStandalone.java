@@ -13,9 +13,11 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.util.empty.EmptyGraph;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
-import cn.edu.nju.pasalab.graphx.GraphTraversalGraphXConverter;
+import cn.edu.nju.pasalab.graphx.GraphDBGraphXConverter;
 
 public class DemoGremlinServerStandalone {
     public static void main(String[] args) throws IOException, ConfigurationException {
@@ -36,11 +38,11 @@ public class DemoGremlinServerStandalone {
         sparkConf.setAppName("gremlin server graphx converter");
         SparkContext sc = new SparkContext(sparkConf);
 
-        org.apache.spark.graphx.Graph<HashMap<String, java.io.Serializable>,
-           HashMap<String, java.io.Serializable>> graphxTest =
-                GraphTraversalGraphXConverter.GraphTraversalToGraphX(g,sc);
+        org.apache.spark.graphx.Graph<Map<String, java.io.Serializable>,
+                Map<String, Serializable>> graphxTest =
+                GraphDBGraphXConverter.GraphDBToGraphX(g,sc);
 
-        GraphTraversalGraphXConverter.GraphXWriteToTraversal(g,graphxTest);
+        //GraphDBGraphXConverter.GraphXToGraphDB(,graphxTest);
 
         cluster.close();
     }
