@@ -6,7 +6,8 @@ import java.{lang, util}
 
 import cn.edu.nju.pasalab.graph.impl.util.DataBaseUtils
 import cn.edu.nju.pasalab.graphx.GraphSONGraphXConverter.convertStringIDToLongID
-
+import org.apache.spark.graphx.VertexId
+import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkContext, graphx}
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.{Property, VertexProperty}
@@ -41,7 +42,7 @@ object GraphDBGraphXConverter extends Serializable{
   }
   def GraphDBToGraphX(g: GraphTraversalSource,sc: SparkContext)
   : graphx.Graph[util.Map[String, java.io.Serializable],
-                  util.Map[String, java.io.Serializable]] ={
+    util.Map[String, java.io.Serializable]] ={
 
     val edgelist = g.E().toList.toSeq
 
@@ -120,7 +121,7 @@ object GraphDBGraphXConverter extends Serializable{
 
   def GraphXToGraphDB(dbConfFilePath: String,dbConf: Properties,
                       graph: graphx.Graph[util.Map[String, java.io.Serializable],
-                               util.Map[String, java.io.Serializable]],
+                        util.Map[String, java.io.Serializable]],
                       isLabelCustomized: Boolean,
                       vertexLabel: String,
                       edgeLabel: String)
@@ -129,22 +130,28 @@ object GraphDBGraphXConverter extends Serializable{
     val conf = if(dbConfFilePath.isEmpty) dbConf else DataBaseUtils.loadConfFromHDFS(dbConfFilePath)
     // Clear the graph that already exists
     val g = DataBaseUtils.openDB(conf).traversal()
-    g.V().drop().iterate()
-    safeCommit(g)
+    DataBaseUtils.deleteGraphVertices(g)
 
+    val newVertices:RDD[(VertexId, Serializable)] = graph.vertices.mapPartitions(iter => {
 
-    val newGraph: graphx.Graph[lang.Long,util.Map[String,java.io.Serializable]] =
-      graph.mapVertices { case (id, properties) =>
-        val graph = DataBaseUtils.openDB(conf)
-        val g = graph.traversal()
-        val label = getLabel(properties,isLabelCustomized,vertexLabel,DEFAULT_VERTEX_LABEL)
+      val graph = DataBaseUtils.openDB(conf)
+      val g = graph.traversal()
 
+      iter.map(vertex => {
+        val label = getLabel(vertex._2,isLabelCustomized,vertexLabel,DEFAULT_VERTEX_LABEL)
         var traversal = g.addV(label)
-        properties.asScala.foreach(attr => traversal = traversal.property(attr._1,attr._2))
+        vertex._2.asScala.foreach(attr => traversal = traversal.property(attr._1,attr._2))
         val vid = traversal.next()
         safeCommit(g)
-        vid.id().asInstanceOf[lang.Long]
-      }
+        (vertex._1,vid.id().asInstanceOf[Serializable])
+      })
+    })
+
+
+    val newGraph: graphx.Graph[Serializable, util.Map[String,java.io.Serializable]]
+       = {
+      graph.outerJoinVertices(newVertices) { (id, oldAttr, outDegOpt) => outDegOpt.get}
+    }
 
     newGraph.triplets.foreachPartition(itr => {
 
@@ -152,14 +159,14 @@ object GraphDBGraphXConverter extends Serializable{
       val g = graph.traversal()
       itr.foreach(tri => {
 
-        val src:lang.Long = tri.srcAttr
-        val dst:lang.Long = tri.dstAttr
+        val src: Serializable = tri.srcAttr
+        val dst: Serializable = tri.dstAttr
 
         val label = getLabel(tri.attr,isLabelCustomized,edgeLabel,DEFAULT_EDGE_LABEL)
 
         // Create the edge from the src to the dst
-        var traversal = g.V(src).as("a").V(dst).as("b").addE(label)
-          .from("a").to("b")
+        var traversal = g.V(src.asInstanceOf[Object]).as("a").V(dst.asInstanceOf[Object])
+          .as("b").addE(label).from("a").to("b")
 
         // Add the properties of the edge
         tri.attr.asScala.foreach(attr => traversal = traversal.property(attr._1,attr._2))
@@ -167,10 +174,8 @@ object GraphDBGraphXConverter extends Serializable{
         traversal.next()
       })
       safeCommit(g)
+      g.getGraph.close()
     })
-    var scan=new Scanner(System.in)
-    scan.next()
-    println("*****************************")
 
   }
 

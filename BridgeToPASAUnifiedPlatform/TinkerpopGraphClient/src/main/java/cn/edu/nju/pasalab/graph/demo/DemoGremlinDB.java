@@ -13,16 +13,19 @@ import java.util.Map;
 
 import cn.edu.nju.pasalab.graphx.GraphDBGraphXConverter;
 
-public class DemoGremlinNeo4j {
+public class DemoGremlinDB {
     public static void main(String[] args) throws Exception {
 
-        String neo4jConfPath = "./conf/database/Neo4j.conf";
-        Graph graph = DataBaseUtils.openDB(neo4jConfPath);
+        //String dbConfPath = "./conf/database/Neo4j.conf";
+        String dbConfPath = "./conf/database/orientdb.conf";
+        Graph graph = DataBaseUtils.openDB(dbConfPath);
         Transaction transaction = graph.tx();
+
         // use Graph API to create, update and delete Vertices and Edges
         graph.io(IoCore.graphson()).readGraph("/home/lijunhong/graphxtosontest/directed.csv.graph/test.json");
         transaction.commit();
 
+        //System.out.println("**********");
         SparkConf conf = new SparkConf().setMaster("local").setAppName("gremlin neo4j");
         SparkContext sc = new SparkContext(conf);
 
@@ -30,7 +33,7 @@ public class DemoGremlinNeo4j {
                 Map<String, Serializable>> graphxTest =
                 GraphDBGraphXConverter.GraphDBToGraphX(graph.traversal(),sc);
 
-        GraphDBGraphXConverter.GraphXToGraphDB(neo4jConfPath,graphxTest);
+        GraphDBGraphXConverter.GraphXToGraphDB(dbConfPath,graphxTest);
 
     }
 }
