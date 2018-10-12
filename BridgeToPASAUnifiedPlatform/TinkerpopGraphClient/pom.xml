@@ -135,6 +135,23 @@
             <artifactId>orientdb-core</artifactId>
             <version>3.0.8</version>
         </dependency>
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-graphdb</artifactId>
+            <version>3.0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-client</artifactId>
+            <version>3.0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-jdbc</artifactId>
+            <version>3.0.8</version>
+        </dependency>
+
+
 
     </dependencies>
 

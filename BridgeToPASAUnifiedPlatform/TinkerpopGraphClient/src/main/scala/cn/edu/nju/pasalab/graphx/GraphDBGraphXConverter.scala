@@ -1,16 +1,18 @@
 package cn.edu.nju.pasalab.graphx
 
-import java.io.Serializable
-import java.util.{Properties, Scanner}
-import java.{lang, util}
+import java.io.{IOException, Serializable}
+import java.util
+import java.util.Properties
 
+import cn.edu.nju.pasalab.graph.impl.util.DBClient.client.IClient
+import cn.edu.nju.pasalab.graph.impl.util.DBClient.factory.{Neo4jClientFactory, OrientDBClientFactory}
 import cn.edu.nju.pasalab.graph.impl.util.DataBaseUtils
 import cn.edu.nju.pasalab.graphx.GraphSONGraphXConverter.convertStringIDToLongID
 import org.apache.spark.graphx.VertexId
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkContext, graphx}
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
-import org.apache.tinkerpop.gremlin.structure.{Property, VertexProperty}
+import org.apache.tinkerpop.gremlin.structure.{Graph, Property, VertexProperty}
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -25,6 +27,19 @@ object GraphDBGraphXConverter extends Serializable{
     * Commit if g supports transactions. Otherwise, do nothing.
     * @param g a graph traversal source in TinkerPop
     */
+  private def createClient(conf: Properties): IClient ={
+    val dbType = conf.getProperty("type")
+    dbType match {
+      case "orientdb" =>
+        val factory = new OrientDBClientFactory
+        factory.createClient(conf)
+      case "neo4j" =>
+        val factory = new Neo4jClientFactory
+        factory.createClient(conf)
+      case _ => throw new IOException("No implementation for graph type:" + conf.getProperty("type"))
+    }
+  }
+
   private def safeCommit(g: GraphTraversalSource): Unit = {
     if (g.getGraph.features().graph().supportsTransactions()) g.tx().commit()
   }
@@ -128,14 +143,14 @@ object GraphDBGraphXConverter extends Serializable{
   : Unit = {
 
     val conf = if(dbConfFilePath.isEmpty) dbConf else DataBaseUtils.loadConfFromHDFS(dbConfFilePath)
+
     // Clear the graph that already exists
-    val g = DataBaseUtils.openDB(conf).traversal()
-    DataBaseUtils.deleteGraphVertices(g)
+    val dbClient = createClient(conf)
+    dbClient.clearGraph()
 
     val newVertices:RDD[(VertexId, Serializable)] = graph.vertices.mapPartitions(iter => {
 
-      val graph = DataBaseUtils.openDB(conf)
-      val g = graph.traversal()
+      val g = createClient(conf).openDB().traversal()
 
       iter.map(vertex => {
         val label = getLabel(vertex._2,isLabelCustomized,vertexLabel,DEFAULT_VERTEX_LABEL)
@@ -149,14 +164,14 @@ object GraphDBGraphXConverter extends Serializable{
 
 
     val newGraph: graphx.Graph[Serializable, util.Map[String,java.io.Serializable]]
-       = {
+    = {
       graph.outerJoinVertices(newVertices) { (id, oldAttr, outDegOpt) => outDegOpt.get}
     }
 
     newGraph.triplets.foreachPartition(itr => {
 
-      val graph = DataBaseUtils.openDB(conf)
-      val g = graph.traversal()
+      val g = createClient(conf).openDB().traversal()
+
       itr.foreach(tri => {
 
         val src: Serializable = tri.srcAttr
