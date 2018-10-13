@@ -12,7 +12,8 @@ import org.apache.spark.graphx.VertexId
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkContext, graphx}
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
-import org.apache.tinkerpop.gremlin.structure.{Graph, Property, VertexProperty}
+import org.apache.tinkerpop.gremlin.structure.{Property, VertexProperty}
+
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -24,8 +25,8 @@ object GraphDBGraphXConverter extends Serializable{
   val DEFAULT_EDGE_LABEL = "SimpleE"
 
   /**
-    * Commit if g supports transactions. Otherwise, do nothing.
-    * @param g a graph traversal source in TinkerPop
+    * Create the database client according to the configuration.
+    * @param conf is a java.util.Properties
     */
   private def createClient(conf: Properties): IClient ={
     val dbType = conf.getProperty("type")
@@ -40,6 +41,10 @@ object GraphDBGraphXConverter extends Serializable{
     }
   }
 
+  /**
+    * Commit if g supports transactions. Otherwise, do nothing.
+    * @param g a graph traversal source in TinkerPop
+    */
   private def safeCommit(g: GraphTraversalSource): Unit = {
     if (g.getGraph.features().graph().supportsTransactions()) g.tx().commit()
   }
@@ -69,6 +74,7 @@ object GraphDBGraphXConverter extends Serializable{
       // Add the properties of the edge
       val edgeAttr: util.Map[String,java.io.Serializable] = new util.HashMap[String,java.io.Serializable]()
       edgeAttr.put("label",edge.label())
+      edgeAttr.put("originalID",edge.id().toString)
       val attr: util.Iterator[Property[Nothing]] = edge.properties()
       attr.foreach(itr => {
         edgeAttr.put(itr.key(),itr.value().toString)
@@ -104,16 +110,18 @@ object GraphDBGraphXConverter extends Serializable{
 
   def GraphXToGraphDB(dbConfFilePath: String,
                       graph: graphx.Graph[util.Map[String, java.io.Serializable],
-                        util.Map[String, java.io.Serializable]])
+                        util.Map[String, java.io.Serializable]],
+                      doClear: Boolean)
   : Unit = {
-    GraphXToGraphDB(dbConfFilePath,null,graph,isLabelCustomized = false,"","")
+    GraphXToGraphDB(dbConfFilePath,null,graph,isLabelCustomized = false,"","",doClear)
   }
 
   def GraphXToGraphDB(dbConf: Properties,
                       graph: graphx.Graph[util.Map[String, java.io.Serializable],
-                        util.Map[String, java.io.Serializable]])
+                        util.Map[String, java.io.Serializable]],
+                      doClear: Boolean)
   : Unit = {
-    GraphXToGraphDB(null,dbConf,graph,isLabelCustomized = false,"","")
+    GraphXToGraphDB(null,dbConf,graph,isLabelCustomized = false,"","",doClear)
   }
 
   def GraphXToGraphDB(dbConfFilePath: String,
@@ -122,7 +130,7 @@ object GraphDBGraphXConverter extends Serializable{
                       vertexLabel: String,
                       edgeLabel: String)
   : Unit = {
-    GraphXToGraphDB(dbConfFilePath,null,graph,isLabelCustomized = true,vertexLabel,edgeLabel)
+    GraphXToGraphDB(dbConfFilePath,null,graph,isLabelCustomized = true,vertexLabel,edgeLabel,true)
   }
 
   def GraphXToGraphDB(dbConf: Properties,
@@ -131,7 +139,7 @@ object GraphDBGraphXConverter extends Serializable{
                       vertexLabel: String,
                       edgeLabel: String)
   : Unit = {
-    GraphXToGraphDB(null,dbConf,graph,isLabelCustomized = false,vertexLabel,edgeLabel)
+    GraphXToGraphDB(null,dbConf,graph,isLabelCustomized = false,vertexLabel,edgeLabel,true)
   }
 
   def GraphXToGraphDB(dbConfFilePath: String,dbConf: Properties,
@@ -139,26 +147,41 @@ object GraphDBGraphXConverter extends Serializable{
                         util.Map[String, java.io.Serializable]],
                       isLabelCustomized: Boolean,
                       vertexLabel: String,
-                      edgeLabel: String)
+                      edgeLabel: String,
+                      doClear: Boolean)
   : Unit = {
 
     val conf = if(dbConfFilePath.isEmpty) dbConf else DataBaseUtils.loadConfFromHDFS(dbConfFilePath)
 
-    // Clear the graph that already exists
-    val dbClient = createClient(conf)
-    dbClient.clearGraph()
+    if(doClear){
+      val dbClient = createClient(conf)
+      dbClient.clearGraph()
+    }
+
 
     val newVertices:RDD[(VertexId, Serializable)] = graph.vertices.mapPartitions(iter => {
 
       val g = createClient(conf).openDB().traversal()
 
       iter.map(vertex => {
-        val label = getLabel(vertex._2,isLabelCustomized,vertexLabel,DEFAULT_VERTEX_LABEL)
-        var traversal = g.addV(label)
+        var traversal = {
+          if(doClear){
+            val label = getLabel(vertex._2,isLabelCustomized,vertexLabel,DEFAULT_VERTEX_LABEL)
+            g.addV(label)
+          }else{
+            val originalID = vertex._2.get("originalID")
+            if(originalID.equals(null)){
+              throw new Exception("GraphX vertex properties don't have originalID.")
+            }else{
+              g.V(originalID.asInstanceOf[Object])
+            }
+          }
+        }
         vertex._2.asScala.foreach(attr => traversal = traversal.property(attr._1,attr._2))
-        val vid = traversal.next()
+        val vtemp = traversal.next()
+        val vid = vtemp.id().asInstanceOf[Serializable]
         safeCommit(g)
-        (vertex._1,vid.id().asInstanceOf[Serializable])
+        (vertex._1,vid)
       })
     })
 
@@ -173,19 +196,26 @@ object GraphDBGraphXConverter extends Serializable{
       val g = createClient(conf).openDB().traversal()
 
       itr.foreach(tri => {
-
         val src: Serializable = tri.srcAttr
         val dst: Serializable = tri.dstAttr
-
-        val label = getLabel(tri.attr,isLabelCustomized,edgeLabel,DEFAULT_EDGE_LABEL)
-
-        // Create the edge from the src to the dst
-        var traversal = g.V(src.asInstanceOf[Object]).as("a").V(dst.asInstanceOf[Object])
-          .as("b").addE(label).from("a").to("b")
+        var traversal = {
+          if(doClear){
+            // Create the edge from the src to the dst
+            val label = getLabel(tri.attr,isLabelCustomized,edgeLabel,DEFAULT_EDGE_LABEL)
+            g.V(src.asInstanceOf[Object]).as("a").V(dst.asInstanceOf[Object])
+              .as("b").addE(label).from("a").to("b")
+          }else{
+            val originalID = tri.attr.get("originalID")
+            if(originalID.equals(null)){
+              throw new Exception("GraphX edge properties don't have originalID.")
+            }else{
+              g.E(originalID.asInstanceOf[Object])
+            }
+          }
+        }
 
         // Add the properties of the edge
         tri.attr.asScala.foreach(attr => traversal = traversal.property(attr._1,attr._2))
-
         traversal.next()
       })
       safeCommit(g)

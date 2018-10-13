@@ -1,6 +1,7 @@
 package cn.edu.nju.pasalab.graph.demo;
 
 import cn.edu.nju.pasalab.graph.impl.util.DBClient.client.IClient;
+import cn.edu.nju.pasalab.graph.impl.util.DBClient.factory.Neo4jClientFactory;
 import cn.edu.nju.pasalab.graph.impl.util.DBClient.factory.OrientDBClientFactory;
 import cn.edu.nju.pasalab.graphx.GraphDBGraphXConverter;
 
@@ -38,7 +39,7 @@ public class DemoGremlinDB {
                 Map<String, Serializable>> graphxTest =
                 GraphDBGraphXConverter.GraphDBToGraphX(graph.traversal(),sc);
 
-        GraphDBGraphXConverter.GraphXToGraphDB(confPath,graphxTest);
+        GraphDBGraphXConverter.GraphXToGraphDB(confPath,graphxTest,false);
 
     }
 }
