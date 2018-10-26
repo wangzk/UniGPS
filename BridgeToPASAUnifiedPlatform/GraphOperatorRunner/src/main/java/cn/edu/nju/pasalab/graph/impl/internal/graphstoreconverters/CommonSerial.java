@@ -3,16 +3,16 @@ package cn.edu.nju.pasalab.graph.impl.internal.graphstoreconverters;
 import cn.edu.nju.pasalab.graph.util.CSVUtils;
 import cn.edu.nju.pasalab.graph.util.HDFSUtils;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
+import org.apache.hadoop.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.addV;
@@ -54,9 +54,32 @@ public class CommonSerial {
         FileSystem fs = HDFSUtils.getFS(inputGraphPath);
         TinkerGraph graph = TinkerGraph.open();
         logger.info("Start to load graph...");
-        try(final InputStream graphFileStream = fs.open(new Path(inputGraphPath))) {
+        Path targetPath = new Path(inputGraphPath,"collect");
+        FileStatus[] stats = fs.listStatus(new Path(inputGraphPath));
+        FSDataOutputStream os =fs.create(targetPath);
+        for(int i = 0; i < stats.length; ++i)
+        {
+            if (stats[i].isFile())
+            {
+                Path path = stats[i].getPath();
+                // regular file
+                FSDataInputStream is = fs.open(path);
+                // get the file info to create the buffer
+                FileStatus stat = fs.getFileStatus(path);
+
+                // create the buffer
+                byte[] buffer = new byte[Integer.parseInt(String.valueOf(stat.getLen()))];
+                //is.read(buffer);
+                is.readFully(buffer);
+                os.write(buffer);
+            }
+        }
+        os.close();
+
+        try(final InputStream graphFileStream = fs.open(targetPath)) {
             graph.io(graphson()).reader().create().readGraph(graphFileStream, graph);
         }
+        fs.delete(targetPath,true);
         System.out.println("Load gryo graph into memory done!");
         System.out.println("|V|=" + graph.traversal().V().count().next()
                 + "\n|E|=" + graph.traversal().E().count().next());
@@ -64,4 +87,5 @@ public class CommonSerial {
         //System.err.println(graph.traversal().E().valueMap(true).next());
         return graph;
     }
+
 }
