@@ -32,7 +32,7 @@ public class LabelPropagationGraphComputer {
         graphComputerConf.setProperty(Constants.GREMLIN_HADOOP_GRAPH_READER, GraphSONInputFormat.class.getName());
         graphComputerConf.setProperty(Constants.GREMLIN_HADOOP_OUTPUT_LOCATION, outputGraphPath);
         graphComputerConf.setProperty(Constants.GREMLIN_HADOOP_GRAPH_WRITER, GraphSONOutputFormat.class.getName());
-        graphComputerConf.setProperty(Constants.GREMLIN_HADOOP_GRAPH_WRITER_HAS_EDGES, "true");
+        graphComputerConf.setProperty (Constants.GREMLIN_HADOOP_GRAPH_WRITER_HAS_EDGES, "true");
         HadoopGraph inputGraph = HadoopGraph.open(graphComputerConf);
         PeerPressureVertexProgram ppvp = PeerPressureVertexProgram.build()
                 .maxIterations(10)

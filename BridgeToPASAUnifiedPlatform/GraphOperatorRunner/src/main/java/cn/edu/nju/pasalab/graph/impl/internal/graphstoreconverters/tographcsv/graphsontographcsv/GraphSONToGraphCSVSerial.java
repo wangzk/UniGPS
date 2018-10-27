@@ -97,6 +97,8 @@ public class GraphSONToGraphCSVSerial {
             while (edgeIterator.hasNext()) {
                 Edge edge = edgeIterator.next();
                 List<Object> values = edgeProperties.stream().map(p -> edge.value(p)).collect(Collectors.toList());
+                values.add(0,edge.inVertex().id());
+                values.add(1,edge.inVertex().id());
                 printer.printRecord(values);
                 count++;
             }

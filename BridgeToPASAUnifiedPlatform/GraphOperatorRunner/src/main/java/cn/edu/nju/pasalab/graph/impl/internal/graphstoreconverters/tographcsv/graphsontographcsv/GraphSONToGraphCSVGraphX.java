@@ -51,7 +51,7 @@ public class GraphSONToGraphCSVGraphX {
         fs.delete(new Path(outputVertexCSVFilePath), true);
         fs.mkdirs(new Path(outputVertexCSVFilePath));
 
-        /////////// Prepare vertex output
+        /////////// Prepare edge output
         Path outputEdgeDirPath = new Path(outputEdgeCSVFilePath);
         Path edgeSchemaFilePath = new Path(outputEdgeDirPath, cn.edu.nju.pasalab.graph.Constants.CSV_SCHEMA_FILE_NAME);
         Path edgeDataFilePath = new Path(outputEdgeDirPath, cn.edu.nju.pasalab.graph.Constants.CSV_DATA_FILE_NAME);

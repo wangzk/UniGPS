@@ -7,6 +7,7 @@ import cn.edu.nju.pasalab.graph.util.HDFSUtils;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -27,6 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static cn.edu.nju.pasalab.graph.impl.internal.graphstoreconverters.CommonSerial.logger;
+
 public class GraphCSVToGraphSONGraphX {
     public static void converter(Map<String, String> arguments) throws Exception {
         ////////// Arguments
@@ -46,9 +49,6 @@ public class GraphCSVToGraphSONGraphX {
         String graphComputerConfFile = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_RUNMODE_CONF_FILE);
 
         ///////// Input Edge file
-        Path edgeCSVFileHDFSPath = new Path(edgeCSVFilePath);
-        Path edgeDataFilePath = new Path(edgeCSVFileHDFSPath, cn.edu.nju.pasalab.graph.Constants.CSV_DATA_FILE_NAME);
-        Path edgeSchemaFilePath = new Path(edgeCSVFileHDFSPath, cn.edu.nju.pasalab.graph.Constants.CSV_SCHEMA_FILE_NAME);
         if (!edgePropertyColumns.contains(edgeSrcColumn)) {
             edgePropertyColumns.add(0, edgeSrcColumn);
         }
@@ -56,80 +56,37 @@ public class GraphCSVToGraphSONGraphX {
             edgePropertyColumns.add(1, edgeDstColumn);
         }
 
-
         ///////// Init spark context
-        CommonGraphComputer.ManageSparkContexts msc = new CommonGraphComputer.ManageSparkContexts(graphComputerConfFile, "CSV File To GraphSON File");
-        SparkContext sc = msc.getSc();
-        JavaSparkContext jsc = msc.getJsc();
+        JavaSparkContext jsc = null;
+        if (graphComputerConfFile != null){
+            CommonGraphComputer.ManageSparkContexts msc = new CommonGraphComputer.ManageSparkContexts(graphComputerConfFile, "CSV File To GraphSON File");
+            jsc = msc.getJsc();
+        } else {
+            SparkConf sparkConf = new SparkConf(true);
+            sparkConf.setAppName("GraphCSV to GraphSON under Serial mode").setMaster("local");
+            jsc = new JavaSparkContext(sparkConf);
+        }
+
 
         ///////// Parse Edge CSV file
-        CSVUtils.CSVSchema edgeCsvSchema = new CSVUtils.CSVSchema(edgeSchemaFilePath);
-        JavaRDD<Map<String,Object>> edgeCsvRDD = jsc.textFile(edgeDataFilePath.toString()).map(csvLine -> {
-            Map<String, Object> columns = edgeCsvSchema.parseCSVLine(csvLine);
-            Map<String, Object> properties = new HashMap<>();
-            edgePropertyColumns.forEach(property -> properties.put(property, columns.get(property)));
-            return properties;
-        });
-
-        JavaRDD<Tuple3<String, String, Map<String, Object>>> edgeRDD = edgeCsvRDD.map(properties -> {
-            return new Tuple3<>(properties.get(edgeSrcColumn).toString(),
-                    properties.get(edgeDstColumn).toString(),
-                    properties);
-        });
-        if (!directed) {
-            edgeRDD = edgeRDD.union(edgeCsvRDD.map(properties -> {
-                return new Tuple3<>(properties.get(edgeDstColumn).toString(),
-                        properties.get(edgeSrcColumn).toString(),
-                        properties);
-            }));
-        }
-        ///////// Get groupped RDD && Construct vertex RDD
         JavaPairRDD<String, Tuple3<String, CommonGraphComputer.VertexDirection, Map<String, Object>>> edgePairRDD =
-                edgeRDD.flatMapToPair((PairFlatMapFunction<Tuple3<String, String, Map<String, Object>>, String, Tuple3<String, CommonGraphComputer.VertexDirection, Map<String, Object>>>) edge -> {
-                    ArrayList<Tuple2<String, Tuple3<String, CommonGraphComputer.VertexDirection, Map<String, Object>>>> tuples = new ArrayList<>();
-                    tuples.add(new Tuple2<>(edge._1(), new Tuple3<>(edge._2(), CommonGraphComputer.VertexDirection.DST, edge._3())));
-                    tuples.add(new Tuple2<>(edge._2(), new Tuple3<>(edge._1(), CommonGraphComputer.VertexDirection.SRC, edge._3())));
-                    return tuples.iterator();
-                });
-        //JavaRDD<Vertex> vertexRDD = edgePairRDD.groupByKey().map(new CommonGraphComputer.EdgeTuplesToVertex());
-
+                new CSVUtils.EdgeCSVParser(edgeCSVFilePath, jsc, edgePropertyColumns, edgeSrcColumn
+                ,edgeDstColumn,directed).get();
 
         JavaPairRDD<String, Iterable<Tuple3<String, CommonGraphComputer.VertexDirection, Map<String, Object>>>> vertexPairRDD =
                 edgePairRDD.groupByKey();
 
+        ///////// Parse Vertex CSV file
         JavaRDD<Vertex> vertexRDD = null;
-
         if (vertexCSVFilePath != null){
-            ///////// Input Vertex file
-            Path vertexCSVFileHDFSPath = new Path(vertexCSVFilePath);
-            Path vertexDataFilePath = new Path(vertexCSVFileHDFSPath, cn.edu.nju.pasalab.graph.Constants.CSV_DATA_FILE_NAME);
-            Path vertexSchemaFilePath = new Path(vertexCSVFileHDFSPath, cn.edu.nju.pasalab.graph.Constants.CSV_SCHEMA_FILE_NAME);
-            if (!vertexPropertyColumns.contains(vertexNameColumn)) {
-                vertexPropertyColumns.add(0, vertexNameColumn);
-            }
-            ///////// Parse Vertex CSV file
-            CSVUtils.CSVSchema vertexCsvSchema = new CSVUtils.CSVSchema(vertexSchemaFilePath);
-            JavaRDD<Map<String,Object>> vertexCsvRDD = jsc.textFile(vertexDataFilePath.toString()).map(csvLine -> {
-                Map<String, Object> columns = vertexCsvSchema.parseCSVLine(csvLine);
-                Map<String, Object> properties = new HashMap<>();
-                vertexPropertyColumns.forEach(property -> properties.put(property, columns.get(property)));
-                return properties;
-            });
-            JavaRDD<Tuple2<String, Map<String, Object>>> vertexAttrRDD = vertexCsvRDD.map(properties -> {
-                return new Tuple2<>(properties.get(vertexNameColumn).toString(),
-                        properties);
-            });
-            JavaPairRDD<String, Map<String, Object>> vertexAttrPairRDD = vertexAttrRDD.flatMapToPair((PairFlatMapFunction<Tuple2<String, Map<String, Object>>, String, Map<String, Object>>) edge -> {
-                ArrayList<Tuple2<String, Map<String, Object>>> tuples = new ArrayList<>();
-                tuples.add(new Tuple2<>(edge._1(), edge._2));
-                return tuples.iterator();});
+
+            JavaPairRDD<String, Map<String, Object>> vertexAttrPairRDD = new CSVUtils.VertexCSVParser(vertexCSVFilePath,
+                    jsc, vertexPropertyColumns, vertexNameColumn, directed).get();
 
             vertexRDD = vertexPairRDD.leftOuterJoin(vertexAttrPairRDD).map(new CommonGraphComputer.EdgeTuplesToVertexWithVProperties());
         } else {
             vertexRDD = vertexPairRDD.map(new CommonGraphComputer.EdgeTuplesToVertex());
         }
-
-
 
         ///////// Output the VertexRDD
         org.apache.commons.configuration.Configuration outputConf = new BaseConfiguration();
@@ -148,8 +105,8 @@ public class GraphCSVToGraphSONGraphX {
         OutputFormatRDD formatRDD = new OutputFormatRDD();
         formatRDD.writeGraphRDD(outputConf, graphRDD);
         jsc.close();
-        sc.stop();
         HDFSUtils.getFS(outputFilePath).rename(new Path(tmpOutputPath, CommonGraphComputer.GREMLIN_TMP_GRAPH_DIR_NAME), new Path(outputFilePath));
         HDFSUtils.getFS(outputFilePath).delete(new Path(tmpOutputPath), true);
+        logger.info("Save the GraphSON file at: " + new Path(outputFilePath).toUri());
     }
 }
