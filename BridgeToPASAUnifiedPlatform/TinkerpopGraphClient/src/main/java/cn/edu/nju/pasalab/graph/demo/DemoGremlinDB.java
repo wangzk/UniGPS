@@ -1,8 +1,7 @@
 package cn.edu.nju.pasalab.graph.demo;
 
-import cn.edu.nju.pasalab.graph.impl.util.DBClient.client.IClient;
-import cn.edu.nju.pasalab.graph.impl.util.DBClient.factory.Neo4jClientFactory;
-import cn.edu.nju.pasalab.graph.impl.util.DBClient.factory.OrientDBClientFactory;
+import cn.edu.nju.pasalab.graph.impl.DBClient.client.IClient;
+import cn.edu.nju.pasalab.graph.impl.DBClient.factory.OrientDBClientFactory;
 import cn.edu.nju.pasalab.graphx.GraphDBGraphXConverter;
 
 import org.apache.spark.SparkConf;

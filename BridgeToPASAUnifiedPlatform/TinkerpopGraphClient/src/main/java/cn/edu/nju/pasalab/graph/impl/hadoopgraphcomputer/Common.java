@@ -1,6 +1,6 @@
 package cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer;
 
-import cn.edu.nju.pasalab.graph.impl.util.ConfUtils;
+import cn.edu.nju.pasalab.graph.impl.ConfUtils;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import org.apache.commons.configuration.Configuration;

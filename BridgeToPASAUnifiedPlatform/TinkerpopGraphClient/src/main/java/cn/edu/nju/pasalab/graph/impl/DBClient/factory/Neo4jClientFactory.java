@@ -1,6 +1,6 @@
-package cn.edu.nju.pasalab.graph.impl.util.DBClient.factory;
+package cn.edu.nju.pasalab.graph.impl.DBClient.factory;
 
-import cn.edu.nju.pasalab.graph.impl.util.DBClient.client.Neo4jClient;
+import cn.edu.nju.pasalab.graph.impl.DBClient.client.Neo4jClient;
 
 import java.util.Properties;
 

@@ -1,8 +1,8 @@
 package cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer;
 
-import cn.edu.nju.pasalab.graph.impl.util.ArgumentUtils;
-import cn.edu.nju.pasalab.graph.impl.util.CSVUtils;
-import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
+import cn.edu.nju.pasalab.graph.impl.ArgumentUtils;
+import cn.edu.nju.pasalab.graph.impl.CSVUtils;
+import cn.edu.nju.pasalab.graph.impl.HDFSUtils;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -10,8 +10,6 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.graphx.EdgeRDD;
-import org.apache.spark.graphx.VertexRDD;
 import org.apache.tinkerpop.gremlin.hadoop.Constants;
 import org.apache.tinkerpop.gremlin.hadoop.structure.HadoopGraph;
 import org.apache.tinkerpop.gremlin.hadoop.structure.io.VertexWritable;

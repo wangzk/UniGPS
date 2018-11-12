@@ -4,16 +4,17 @@ import java.io.{IOException, Serializable}
 import java.util
 import java.util.Properties
 
-import cn.edu.nju.pasalab.graph.impl.util.DBClient.client.IClient
-import cn.edu.nju.pasalab.graph.impl.util.DBClient.factory.{Neo4jClientFactory, OrientDBClientFactory}
-import cn.edu.nju.pasalab.graph.impl.util.DataBaseUtils
+import cn.edu.nju.pasalab.graph.impl.DBClient.client.IClient
+import cn.edu.nju.pasalab.graph.impl.DBClient.factory.{Neo4jClientFactory, OrientDBClientFactory}
+import cn.edu.nju.pasalab.graph.impl.DataBaseUtils
+import cn.edu.nju.pasalab.graph.impl.DBClient.factory.{Neo4jClientFactory, OrientDBClientFactory}
+import cn.edu.nju.pasalab.graph.impl.DataBaseUtils
 import cn.edu.nju.pasalab.graphx.GraphSONGraphXConverter.convertStringIDToLongID
 import org.apache.spark.graphx.VertexId
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkContext, graphx}
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.{Property, VertexProperty}
-
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._

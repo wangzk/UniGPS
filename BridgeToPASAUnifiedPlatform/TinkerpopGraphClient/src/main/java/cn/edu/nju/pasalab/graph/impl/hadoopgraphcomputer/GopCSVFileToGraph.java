@@ -1,8 +1,8 @@
 package cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer;
 
-import cn.edu.nju.pasalab.graph.impl.util.ArgumentUtils;
-import cn.edu.nju.pasalab.graph.impl.util.CSVUtils;
-import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
+import cn.edu.nju.pasalab.graph.impl.ArgumentUtils;
+import cn.edu.nju.pasalab.graph.impl.CSVUtils;
+import cn.edu.nju.pasalab.graph.impl.HDFSUtils;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -18,7 +18,6 @@ import org.apache.tinkerpop.gremlin.hadoop.structure.io.VertexWritable;
 import org.apache.tinkerpop.gremlin.hadoop.structure.io.graphson.GraphSONOutputFormat;
 import org.apache.tinkerpop.gremlin.spark.structure.io.OutputFormatRDD;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import scala.Serializable;
 import scala.Tuple2;
 import scala.Tuple3;
 

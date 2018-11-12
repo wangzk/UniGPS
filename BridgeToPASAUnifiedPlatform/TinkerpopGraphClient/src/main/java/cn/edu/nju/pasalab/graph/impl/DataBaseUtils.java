@@ -1,4 +1,4 @@
-package cn.edu.nju.pasalab.graph.impl.util;
+package cn.edu.nju.pasalab.graph.impl;
 
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.steelbridgelabs.oss.neo4j.structure.Neo4JElementIdProvider;

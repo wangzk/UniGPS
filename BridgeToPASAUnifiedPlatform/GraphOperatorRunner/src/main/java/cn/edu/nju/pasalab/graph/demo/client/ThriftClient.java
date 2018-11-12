@@ -1,7 +1,7 @@
+/*
 package cn.edu.nju.pasalab.graph.demo.client;
 
 import cn.edu.nju.pasalab.graph.Constants;
-import cn.edu.nju.pasalab.graph.server.GraphOperatorsService;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -42,9 +42,11 @@ public class ThriftClient {
         }
     }
 
-    /**
+    */
+/**
      * @param args
-     */
+     *//*
+
     public static void main(String[] args) {
         ThriftClient client = new ThriftClient();
         Map<String, String> arguments = new HashMap<>();
@@ -63,3 +65,4 @@ public class ThriftClient {
         client.startClient(arguments);
     }
 }
+*/

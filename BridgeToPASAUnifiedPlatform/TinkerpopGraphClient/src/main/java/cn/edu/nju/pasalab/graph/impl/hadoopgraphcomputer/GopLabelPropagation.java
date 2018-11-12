@@ -1,7 +1,7 @@
 package cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer;
 
-import cn.edu.nju.pasalab.graph.impl.util.ConfUtils;
-import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
+import cn.edu.nju.pasalab.graph.impl.ConfUtils;
+import cn.edu.nju.pasalab.graph.impl.HDFSUtils;
 import org.apache.commons.configuration.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;

@@ -3,8 +3,8 @@ package cn.edu.nju.pasalab.graph.impl.graphx
 import java.util
 import java.util.{HashMap, Map}
 
+import cn.edu.nju.pasalab.graph.impl.HDFSUtils
 import cn.edu.nju.pasalab.graph.impl.hadoopgraphcomputer.Common
-import cn.edu.nju.pasalab.graph.impl.util.{ConfUtils, HDFSUtils}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.{SparkContext, graphx}
 import org.apache.spark.graphx.lib.LabelPropagation

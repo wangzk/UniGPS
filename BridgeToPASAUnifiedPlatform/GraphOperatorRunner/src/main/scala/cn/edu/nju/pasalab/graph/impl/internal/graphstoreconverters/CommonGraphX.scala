@@ -1,14 +1,16 @@
 package cn.edu.nju.pasalab.graph.impl.internal.graphstoreconverters
 
-import java.util.Map
+import java.io.IOException
+import java.util.{Map, Properties}
 import java.{lang, util}
 
 import com.google.common.base.Charsets
 import com.google.common.hash.Hashing
 import org.apache.tinkerpop.gremlin.structure.{Edge, T, Vertex}
 import org.apache.tinkerpop.gremlin.structure.util.star.StarGraph
-
 import CommonGraphComputer._
+import cn.edu.nju.pasalab.graph.util.DBClient.client.IClient
+import cn.edu.nju.pasalab.graph.util.DBClient.factory.{Neo4jClientFactory, OrientDBClientFactory}
 
 import scala.collection.JavaConverters._
 
@@ -63,5 +65,17 @@ object CommonGraphX {
     e
   }
 
+  def createDBClient(conf: Properties): IClient ={
+    val dbType = conf.getProperty("type")
+    dbType match {
+      case "orientdb" =>
+        val factory = new OrientDBClientFactory
+        factory.createClient(conf)
+      case "neo4j" =>
+        val factory = new Neo4jClientFactory
+        factory.createClient(conf)
+      case _ => throw new IOException("No implementation for graph type:" + conf.getProperty("type"))
+    }
+  }
 
 }

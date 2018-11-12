@@ -1,4 +1,4 @@
-package cn.edu.nju.pasalab.graph.impl.util.DBClient.client;
+package cn.edu.nju.pasalab.graph.impl.DBClient.client;
 
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import java.util.Properties;

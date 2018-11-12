@@ -1,6 +1,6 @@
-package cn.edu.nju.pasalab.graph.impl.util.DBClient.factory;
-import cn.edu.nju.pasalab.graph.impl.util.DBClient.client.IClient;
-import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
+package cn.edu.nju.pasalab.graph.impl.DBClient.factory;
+import cn.edu.nju.pasalab.graph.impl.DBClient.client.IClient;
+import cn.edu.nju.pasalab.graph.impl.HDFSUtils;
 
 import java.io.IOException;
 import java.io.InputStream;

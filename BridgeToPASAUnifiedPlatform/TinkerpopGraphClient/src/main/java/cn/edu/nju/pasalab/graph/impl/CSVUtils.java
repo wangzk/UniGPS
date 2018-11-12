@@ -1,4 +1,4 @@
-package cn.edu.nju.pasalab.graph.impl.util;
+package cn.edu.nju.pasalab.graph.impl;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;

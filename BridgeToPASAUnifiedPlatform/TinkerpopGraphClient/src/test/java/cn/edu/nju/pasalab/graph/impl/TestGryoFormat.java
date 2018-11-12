@@ -1,6 +1,5 @@
 package cn.edu.nju.pasalab.graph.impl;
 
-import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;

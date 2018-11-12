@@ -1,7 +1,7 @@
 package cn.edu.nju.pasalab.graph.demo;
 
 
-import cn.edu.nju.pasalab.graph.impl.util.ConfUtils;
+import cn.edu.nju.pasalab.graph.impl.ConfUtils;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.spark.SparkConf;
@@ -14,7 +14,6 @@ import org.apache.tinkerpop.gremlin.structure.util.empty.EmptyGraph;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 import cn.edu.nju.pasalab.graphx.GraphDBGraphXConverter;

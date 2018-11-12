@@ -1,4 +1,4 @@
-package cn.edu.nju.pasalab.graph.impl.util.DBClient.client;
+package cn.edu.nju.pasalab.graph.impl.DBClient.client;
 
 import com.orientechnologies.orient.jdbc.OrientJdbcConnection;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;

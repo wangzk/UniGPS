@@ -17,7 +17,7 @@ public class ThriftServer {
         try {
             System.out.println("Thrift Server start ....");
 
-            TProcessor tprocessor = new GraphOperatorsService.Processor<GraphOperatorsService.Iface>(new GraphOperators());
+            TProcessor tprocessor = new GraphOpService.Processor<GraphOpService.Iface>(new GraphOperators());
 
             // 简单的单线程服务模型，用于测试
             TServerSocket serverTransport = new TServerSocket(SERVER_PORT);

@@ -6,6 +6,8 @@ import org.apache.hadoop.fs.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class HDFSUtils {
 
@@ -55,4 +57,9 @@ public class HDFSUtils {
         FileSystem fs = getFS(file);
         return fs.create(filePath);
     }
+
+    public static String getTimeName(){
+        return "tmp_" + new SimpleDateFormat("yyMMddHHmmss").format(new Date());
+    }
+
 }

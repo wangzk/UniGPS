@@ -1,12 +1,14 @@
 package cn.edu.nju.pasalab.graph.impl.internal.graphstoreconverters
 
-import java.io.{IOException, Serializable}
+import java.io.{IOException, PrintWriter, Serializable}
+import java.nio.file.FileSystem
 import java.util
 import java.util.Properties
 
+import cn.edu.nju.pasalab.graph.util.HDFSUtils
 import cn.edu.nju.pasalab.graph.util.DBClient.client.IClient
 import cn.edu.nju.pasalab.graph.util.DBClient.factory.{Neo4jClientFactory, OrientDBClientFactory}
-import org.apache.spark.graphx.VertexId
+import org.apache.spark.graphx.{Edge, VertexId}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkContext, graphx}
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
@@ -16,6 +18,10 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import CommonGraphX._
 import cn.edu.nju.pasalab.graph.util.DataBaseUtils
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.Path
+
+import scala.collection.mutable.ArrayBuffer
 
 object GraphDBGraphXConverter extends Serializable{
 
@@ -62,9 +68,9 @@ object GraphDBGraphXConverter extends Serializable{
   : graphx.Graph[util.Map[String, java.io.Serializable],
     util.Map[String, java.io.Serializable]] ={
 
-    val edgelist = g.E().toList.toSeq
+      val edgelist = g.E().toList.toSeq
 
-    val graphxEdge = edgelist.map(edge => {
+      val graphxEdge = edgelist.map(edge => {
       val srcId = edge.inVertex.id().toString
       val dstId = edge.outVertex.id().toString
       val md1 = convertStringIDToLongID(srcId)
@@ -99,6 +105,7 @@ object GraphDBGraphXConverter extends Serializable{
     // Make the RDD for GraphX
     val vertexRDD = sc.parallelize(graphxVertex)
     val edgeRDD = sc.parallelize(graphxEdge)
+    //val edgeRDD = graphXEdge
 
     // Appoint the type of the vertex and edge attributes
     graphx.Graph[util.Map[String,java.io.Serializable],

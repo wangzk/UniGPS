@@ -1,4 +1,4 @@
-package cn.edu.nju.pasalab.graph.impl.util;
+package cn.edu.nju.pasalab.graph.impl;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;

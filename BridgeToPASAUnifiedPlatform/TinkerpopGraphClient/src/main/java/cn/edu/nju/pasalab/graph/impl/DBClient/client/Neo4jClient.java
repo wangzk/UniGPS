@@ -1,4 +1,4 @@
-package cn.edu.nju.pasalab.graph.impl.util.DBClient.client;
+package cn.edu.nju.pasalab.graph.impl.DBClient.client;
 
 import com.steelbridgelabs.oss.neo4j.structure.Neo4JElementIdProvider;
 import com.steelbridgelabs.oss.neo4j.structure.Neo4JGraph;

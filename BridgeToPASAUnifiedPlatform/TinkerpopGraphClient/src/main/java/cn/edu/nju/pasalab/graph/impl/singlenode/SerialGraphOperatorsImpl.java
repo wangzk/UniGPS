@@ -2,8 +2,8 @@ package cn.edu.nju.pasalab.graph.impl.singlenode;
 
 import cn.edu.nju.pasalab.graph.Constants;
 import cn.edu.nju.pasalab.graph.MyEdge;
-import cn.edu.nju.pasalab.graph.impl.util.CSVUtils;
-import cn.edu.nju.pasalab.graph.impl.util.HDFSUtils;
+import cn.edu.nju.pasalab.graph.impl.CSVUtils;
+import cn.edu.nju.pasalab.graph.impl.HDFSUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
