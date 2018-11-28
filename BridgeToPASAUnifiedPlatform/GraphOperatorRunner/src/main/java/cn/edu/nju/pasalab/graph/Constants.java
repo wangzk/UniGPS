@@ -4,6 +4,8 @@ public class Constants {
     public static final String GRAPHTYPE_TINKERPOPDB = "TinkerPopDB";
     public static final String GRAPHTYPE_GREMLIN_SERVER = "GremlinServer";
     public static final String GRAPHTYPE_GRAPHSON = "GraphSON";
+    public static final String GRAPHTYPE_GRAPHDB_NEO4J = "Neo4J";
+    public static final String GRAPHTYPE_GRAPHDB_ORIENTDB = "OrientDB";
 
     public static final String RUNMODE_SERIAL = "Serial";
     public static final String RUNMODE_TINKERPOP_GRAPHCOMPUTER = "TinkerPopGraphComputer";

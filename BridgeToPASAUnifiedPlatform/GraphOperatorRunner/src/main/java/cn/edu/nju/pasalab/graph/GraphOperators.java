@@ -30,6 +30,7 @@ public class GraphOperators implements GraphOpService.Iface {
         arguments.put(Constants.ARG_DIRECTED, directed);
         arguments.put(Constants.ARG_OUTPUT_GRAPH_CONF_FILE, outputGraphConfFile);
         arguments.put(Constants.ARG_RUNMODE, runMode);
+        arguments.put(Constants.ARG_OUTPUT_GRAPH_TYPE, outputGraphType);
         if (!runModeConfFile.equals("")){
             arguments.put(Constants.ARG_RUNMODE_CONF_FILE, runModeConfFile);
         }
@@ -37,6 +38,8 @@ public class GraphOperators implements GraphOpService.Iface {
         arguments.put(Constants.ARG_VERTEX_PROPERTY_COLUMNS, vertexPropertyColumns);
         if (outputGraphType.equals(Constants.GRAPHTYPE_GRAPHSON)) {
             CSVFileToGraph.toGraphSON(arguments);
+        } else if (outputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_NEO4J)) {
+            CSVFileToGraph.toGraphDB(arguments);
         } else {
             throw new UnsupportedOperationException("No implementation for graph type:" + outputGraphType);
         }

@@ -11,7 +11,7 @@ import org.apache.thrift.server.TSimpleServer;
 import org.apache.thrift.transport.TServerSocket;
 
 public class ThriftServer {
-    public static final int SERVER_PORT = 8090;
+    public static final int SERVER_PORT = 8091;
 
     public void startServer() {
         try {

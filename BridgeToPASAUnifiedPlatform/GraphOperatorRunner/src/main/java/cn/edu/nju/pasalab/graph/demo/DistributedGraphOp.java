@@ -21,8 +21,8 @@ public class DistributedGraphOp {
     public void testGopCSVFileToGraph() throws Exception {
         GraphOperators op = new GraphOperators();
         op.GopCSVFileToGraph(inputEdgeCSVFile, "p1","p2",
-                "weight","true",Constants.GRAPHTYPE_GRAPHSON,
-                inputEdgeCSVFile + ".graph",Constants.RUNMODE_SERIAL,"",
+                "weight","true",Constants.GRAPHTYPE_GRAPHDB_NEO4J,
+                "/home/lijunhong/graphxtosontest/Neo4j.conf",Constants.RUNMODE_SERIAL,"",
                 inputVertexCSVFile,"name","test");
     }
 
@@ -52,12 +52,12 @@ public class DistributedGraphOp {
     }
 
     public static void main(String args[]) throws Exception {
-        //String inputVertexCSVFile = "/home/lijunhong/graphxtosontest/vertex.csv";
+        String inputVertexCSVFile = "/home/lijunhong/graphxtosontest/vertex.csv";
         //String inputVertexCSVFile = null;
         String inputfile = args[0];
-        String inputVertexCSVFile = inputfile + "/vertex";
-        //String inputEdgeCSVFile = "/home/lijunhong/graphxtosontest/test.csv";
-        String inputEdgeCSVFile = inputfile + "/test";
+        //String inputVertexCSVFile = inputfile + "/vertex";
+        String inputEdgeCSVFile = "/home/lijunhong/graphxtosontest/test.csv";
+        //String inputEdgeCSVFile = inputfile + "/test";
         String graphComputerPath = inputfile + "/SparkLocal.conf";
         DistributedGraphOp op = new DistributedGraphOp(inputEdgeCSVFile, inputVertexCSVFile,graphComputerPath);
         op.run();
