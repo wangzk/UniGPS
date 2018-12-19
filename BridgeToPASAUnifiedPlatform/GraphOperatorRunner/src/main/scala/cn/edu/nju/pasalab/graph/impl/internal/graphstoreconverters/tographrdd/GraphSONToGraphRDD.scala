@@ -3,7 +3,7 @@ package cn.edu.nju.pasalab.graph.impl.internal.graphstoreconverters.tographrdd
 import java.util
 import java.util.HashMap
 
-import org.apache.spark.{SparkContext, graphx}
+import org.apache.spark.{SparkConf, SparkContext, graphx}
 import org.apache.spark.rdd.RDD
 import org.apache.commons.configuration.BaseConfiguration
 import org.apache.spark.api.java.{JavaPairRDD, JavaSparkContext}
@@ -16,7 +16,6 @@ import org.apache.tinkerpop.gremlin.hadoop.structure.io.VertexWritable
 import org.apache.tinkerpop.gremlin.spark.structure.io.{InputFormatRDD, OutputFormatRDD}
 
 import scala.collection.JavaConverters._
-
 import cn.edu.nju.pasalab.graph.impl.internal.graphstoreconverters.CommonGraphX._
 
 
@@ -48,6 +47,7 @@ object GraphSONToGraphRDD extends Serializable {
       // Pass the vertex properties to GraphX vertex value map and remain the original vertex id
       var graphxValueMap : HashMap[String,java.io.Serializable] = new HashMap[String,java.io.Serializable]()
       graphxValueMap.put("originalID",v.id().toString)
+      graphxValueMap.put("originalHashID",vid)
       graphxValueMap.putAll(g.traversal.V(v.id).valueMap().next(1).get(0))
       (vid,graphxValueMap)
     })
@@ -81,6 +81,18 @@ object GraphSONToGraphRDD extends Serializable {
     // Return the graph ,appoint the properties of the vertex and the edge as type HashMap
     graphx.Graph[util.HashMap[String,java.io.Serializable],
       HashMap[String,java.io.Serializable]](vertexRDD,edgeRDD,new HashMap[String,java.io.Serializable]())
+  }
+
+  def main(args: Array[String]): Unit = {
+    val inputGraphFilePath = "/home/lijunhong/graphxtosontest/lptmp/tmp_181216200840out/~g"
+    val sparkConf = new SparkConf().setMaster("local").setAppName("gremlin neo4j")
+    val sc = new SparkContext(sparkConf)
+    val graph :graphx.Graph[util.HashMap[String,java.io.Serializable],
+      HashMap[String,java.io.Serializable]] = converter(sc,inputGraphFilePath)
+
+    graph.vertices.foreach(ver => println(ver._2))
+
+
   }
 
 }

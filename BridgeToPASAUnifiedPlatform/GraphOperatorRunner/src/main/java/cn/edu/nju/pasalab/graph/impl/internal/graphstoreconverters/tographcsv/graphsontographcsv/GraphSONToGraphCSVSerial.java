@@ -10,7 +10,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -20,6 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static cn.edu.nju.pasalab.graph.impl.internal.graphstoreconverters.CommonSerial.*;
+import static org.apache.tinkerpop.gremlin.structure.io.IoCore.graphson;
 
 public class GraphSONToGraphCSVSerial {
 
@@ -35,7 +38,11 @@ public class GraphSONToGraphCSVSerial {
         String outputEdgeCSVFilePath = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_OUTPUT_EDGE_CSV_FILE_PATH);
 
         FileSystem fs = HDFSUtils.getFS(inputGraphPath);
-        Graph graph = loadGraphSONToTinkerGraph(inputGraphPath);
+        //Graph graph = loadGraphSONToTinkerGraph(inputGraphPath);
+        Graph graph = TinkerGraph.open();
+        try(final InputStream graphFileStream = fs.open(new Path(inputGraphPath))) {
+            graph.io(graphson()).reader().create().readGraph(graphFileStream, graph);
+        }
 
         /////////// Prepare vertex output
         Path outputVertexDirPath = new Path(outputVertexCSVFilePath);
@@ -64,6 +71,7 @@ public class GraphSONToGraphCSVSerial {
             while (vertexIterator.hasNext()) {
                 Vertex vertex = vertexIterator.next();
                 List<Object> values = vertexProperties.stream().map(p -> vertex.value(p)).collect(Collectors.toList());
+                values.add(0,vertex.id());
                 printer.printRecord(values);
                 count++;
             }

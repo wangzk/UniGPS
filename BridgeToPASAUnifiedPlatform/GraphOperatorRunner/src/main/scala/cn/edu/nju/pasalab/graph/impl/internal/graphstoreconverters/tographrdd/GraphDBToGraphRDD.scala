@@ -20,7 +20,7 @@ object GraphDBToGraphRDD {
 
   def converter(g: GraphTraversalSource, sc: SparkContext,
                 dbConfFilePath: String)
-  : Graph[util.Map[String, io.Serializable], util.Map[String, io.Serializable]] = {
+  : Graph[util.HashMap[String, io.Serializable], util.HashMap[String, io.Serializable]] = {
 
     val conf = DataBaseUtils.loadConfFromHDFS(dbConfFilePath)
     val tmpDirPath = conf.getProperty("tmpdirpath")
@@ -42,15 +42,16 @@ object GraphDBToGraphRDD {
 
     val vertexRDD = vertexlist.mapPartitions(vertexIter => {
       val g = createDBClient(conf).openDB().traversal()
-      val res = ArrayBuffer[(Long,util.Map[String,java.io.Serializable])]()
+      val res = ArrayBuffer[(Long,util.HashMap[String,java.io.Serializable])]()
       while (vertexIter.hasNext){
 
         val vertexId = vertexIter.next()
         val vertex = g.V(vertexId).next()
         val md = convertStringIDToLongID(vertexId)
-        val vertexAttr: util.Map[String,java.io.Serializable] = new util.HashMap[String,java.io.Serializable]()
+        val vertexAttr: util.HashMap[String,java.io.Serializable] = new util.HashMap[String,java.io.Serializable]()
         vertexAttr.put("label",vertex.label())
         vertexAttr.put("originalID",vertexId)
+        vertexAttr.put("originalHashID",md)
         val attr: java.util.Iterator[VertexProperty[Nothing]] = vertex.properties()
         attr.foreach(itr => {
           vertexAttr.put(itr.key(),itr.value().toString)
@@ -62,7 +63,7 @@ object GraphDBToGraphRDD {
 
     val edgeRDD = vertexlist.mapPartitions(vertexIter => {
       val g = createDBClient(conf).openDB().traversal()
-      val res = new ArrayBuffer[Edge[util.Map[String,java.io.Serializable]]]()
+      val res = new ArrayBuffer[Edge[util.HashMap[String,java.io.Serializable]]]()
       while (vertexIter.hasNext){
         val vertexId = vertexIter.next()
         val edgeItr = g.V(vertexId).outE()
@@ -72,7 +73,7 @@ object GraphDBToGraphRDD {
           val srcId = edge.inVertex.id().toString
           val md1 = convertStringIDToLongID(srcId)
           // Add the properties of the edge
-          val edgeAttr: util.Map[String,java.io.Serializable] = new util.HashMap[String,java.io.Serializable]()
+          val edgeAttr: util.HashMap[String,java.io.Serializable] = new util.HashMap[String,java.io.Serializable]()
           edgeAttr.put("label",edge.label())
           edgeAttr.put("originalID",edge.id().toString)
           val attr: util.Iterator[Property[Nothing]] = edge.properties()
@@ -85,8 +86,8 @@ object GraphDBToGraphRDD {
       res.iterator
     })
 
-    graphx.Graph[util.Map[String,java.io.Serializable],
-      util.Map[String,java.io.Serializable]](vertexRDD,edgeRDD,new util.HashMap[String,java.io.Serializable]())
+    graphx.Graph[util.HashMap[String,java.io.Serializable],
+      util.HashMap[String,java.io.Serializable]](vertexRDD,edgeRDD,new util.HashMap[String,java.io.Serializable]())
 
   }
 }

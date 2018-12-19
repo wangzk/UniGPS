@@ -6,6 +6,7 @@ public class Constants {
     public static final String GRAPHTYPE_GRAPHSON = "GraphSON";
     public static final String GRAPHTYPE_GRAPHDB_NEO4J = "Neo4J";
     public static final String GRAPHTYPE_GRAPHDB_ORIENTDB = "OrientDB";
+    public static final String GRAPHTYPE_GRAPH_MEMORY = "Memory";
 
     public static final String RUNMODE_SERIAL = "Serial";
     public static final String RUNMODE_TINKERPOP_GRAPHCOMPUTER = "TinkerPopGraphComputer";

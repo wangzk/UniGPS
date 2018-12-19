@@ -30,6 +30,7 @@ object GraphRDDToGraphSON extends Serializable {
     // Get the sparkcontext
     val sc = graphRDD.edges.sparkContext
 
+    //graphRDD.vertices.foreach(ver => println(ver._1))
     // Tuple2 of the src vertex id and the array of all its out Edge
     val vertexRDDWithEdgeProperties = graphRDD.collectEdges(EdgeDirection.Out)
 

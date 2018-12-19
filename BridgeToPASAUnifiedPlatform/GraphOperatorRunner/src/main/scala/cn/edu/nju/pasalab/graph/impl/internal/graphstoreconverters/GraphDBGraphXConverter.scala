@@ -53,7 +53,7 @@ object GraphDBGraphXConverter extends Serializable{
     if (g.getGraph.features().graph().supportsTransactions()) g.tx().commit()
   }
 
-  private def getLabel(attr: util.Map[String, java.io.Serializable],
+  private def getLabel(attr: util.HashMap[String, java.io.Serializable],
                        isCustomized: Boolean,
                        label: String,
                        default: String): String = {
@@ -65,8 +65,8 @@ object GraphDBGraphXConverter extends Serializable{
     }
   }
   def GraphDBToGraphX(g: GraphTraversalSource,sc: SparkContext)
-  : graphx.Graph[util.Map[String, java.io.Serializable],
-    util.Map[String, java.io.Serializable]] ={
+  : graphx.Graph[util.HashMap[String, java.io.Serializable],
+    util.HashMap[String, java.io.Serializable]] ={
 
       val edgelist = g.E().toList.toSeq
 
@@ -76,7 +76,7 @@ object GraphDBGraphXConverter extends Serializable{
       val md1 = convertStringIDToLongID(srcId)
       val md2 = convertStringIDToLongID(dstId)
       // Add the properties of the edge
-      val edgeAttr: util.Map[String,java.io.Serializable] = new util.HashMap[String,java.io.Serializable]()
+      val edgeAttr: util.HashMap[String,java.io.Serializable] = new util.HashMap[String,java.io.Serializable]()
       edgeAttr.put("label",edge.label())
       edgeAttr.put("originalID",edge.id().toString)
       val attr: util.Iterator[Property[Nothing]] = edge.properties()
@@ -92,9 +92,10 @@ object GraphDBGraphXConverter extends Serializable{
     val graphxVertex = vertexlist.map(vertex => {
       val vertexId = vertex.id().toString
       val md = convertStringIDToLongID(vertexId)
-      val vertexAttr: util.Map[String,java.io.Serializable] = new util.HashMap[String,java.io.Serializable]()
+      val vertexAttr: util.HashMap[String,java.io.Serializable] = new util.HashMap[String,java.io.Serializable]()
       vertexAttr.put("label",vertex.label())
       vertexAttr.put("originalID",vertexId)
+      vertexAttr.put("originalHashID",md)
       val attr: java.util.Iterator[VertexProperty[Nothing]] = vertex.properties()
       attr.foreach(itr => {
         vertexAttr.put(itr.key(),itr.value().toString)
@@ -108,30 +109,30 @@ object GraphDBGraphXConverter extends Serializable{
     //val edgeRDD = graphXEdge
 
     // Appoint the type of the vertex and edge attributes
-    graphx.Graph[util.Map[String,java.io.Serializable],
-      util.Map[String,java.io.Serializable]](vertexRDD,edgeRDD,new util.HashMap[String,java.io.Serializable]())
+    graphx.Graph[util.HashMap[String,java.io.Serializable],
+      util.HashMap[String,java.io.Serializable]](vertexRDD,edgeRDD,new util.HashMap[String,java.io.Serializable]())
   }
 
 
   def GraphXToGraphDB(dbConfFilePath: String,
-                      graph: graphx.Graph[util.Map[String, java.io.Serializable],
-                        util.Map[String, java.io.Serializable]],
+                      graph: graphx.Graph[util.HashMap[String, java.io.Serializable],
+                        util.HashMap[String, java.io.Serializable]],
                       doClear: Boolean)
   : Unit = {
     GraphXToGraphDB(dbConfFilePath,null,graph,isLabelCustomized = false,"","",doClear)
   }
 
   def GraphXToGraphDB(dbConf: Properties,
-                      graph: graphx.Graph[util.Map[String, java.io.Serializable],
-                        util.Map[String, java.io.Serializable]],
+                      graph: graphx.Graph[util.HashMap[String, java.io.Serializable],
+                        util.HashMap[String, java.io.Serializable]],
                       doClear: Boolean)
   : Unit = {
     GraphXToGraphDB(null,dbConf,graph,isLabelCustomized = false,"","",doClear)
   }
 
   def GraphXToGraphDB(dbConfFilePath: String,
-                      graph: graphx.Graph[util.Map[String, java.io.Serializable],
-                        util.Map[String, java.io.Serializable]],
+                      graph: graphx.Graph[util.HashMap[String, java.io.Serializable],
+                        util.HashMap[String, java.io.Serializable]],
                       vertexLabel: String,
                       edgeLabel: String)
   : Unit = {
@@ -139,8 +140,8 @@ object GraphDBGraphXConverter extends Serializable{
   }
 
   def GraphXToGraphDB(dbConf: Properties,
-                      graph: graphx.Graph[util.Map[String, java.io.Serializable],
-                        util.Map[String, java.io.Serializable]],
+                      graph: graphx.Graph[util.HashMap[String, java.io.Serializable],
+                        util.HashMap[String, java.io.Serializable]],
                       vertexLabel: String,
                       edgeLabel: String)
   : Unit = {
@@ -148,8 +149,8 @@ object GraphDBGraphXConverter extends Serializable{
   }
 
   def GraphXToGraphDB(dbConfFilePath: String,dbConf: Properties,
-                      graph: graphx.Graph[util.Map[String, java.io.Serializable],
-                        util.Map[String, java.io.Serializable]],
+                      graph: graphx.Graph[util.HashMap[String, java.io.Serializable],
+                        util.HashMap[String, java.io.Serializable]],
                       isLabelCustomized: Boolean,
                       vertexLabel: String,
                       edgeLabel: String,
@@ -191,10 +192,12 @@ object GraphDBGraphXConverter extends Serializable{
     })
 
 
-    val newGraph: graphx.Graph[Serializable, util.Map[String,java.io.Serializable]]
+    val newGraph: graphx.Graph[Serializable, util.HashMap[String,java.io.Serializable]]
     = {
       graph.outerJoinVertices(newVertices) { (id, oldAttr, outDegOpt) => outDegOpt.get}
     }
+
+    newGraph.triplets.foreach(tri => println(tri.srcId))
 
     newGraph.triplets.foreachPartition(itr => {
 

@@ -6,11 +6,13 @@ import java.{lang, util}
 
 import com.google.common.base.Charsets
 import com.google.common.hash.Hashing
-import org.apache.tinkerpop.gremlin.structure.{Edge, T, Vertex}
+import org.apache.tinkerpop.gremlin.structure.{Edge, T, Vertex, VertexProperty}
 import org.apache.tinkerpop.gremlin.structure.util.star.StarGraph
 import CommonGraphComputer._
 import cn.edu.nju.pasalab.graph.util.DBClient.client.IClient
 import cn.edu.nju.pasalab.graph.util.DBClient.factory.{Neo4jClientFactory, OrientDBClientFactory}
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.{GraphTraversal, GraphTraversalSource}
+import org.apache.tinkerpop.gremlin.structure.util.star.StarGraph
 
 import scala.collection.JavaConverters._
 
@@ -34,6 +36,7 @@ object CommonGraphX {
 
     // Get the vertex contained in the cache or create one
     // Return the vertex
+
     if (cache.containsKey(name) && !isCenter) cache.get(name)
     else if (!cache.containsKey(name) && !isCenter) {
       val v = graph.addVertex(T.id, name:lang.Long, T.label, DEFAULT_VERTEX_LABEL)
@@ -44,17 +47,84 @@ object CommonGraphX {
 
       // Add the properties only if the vertex is center vertex
       properties.asScala.foreach(pro => {
-        v.property(pro._1, pro._2)
+        if (pro._2.isInstanceOf[util.ArrayList[Int]]) {
+          v.property(pro._1, pro._2.asInstanceOf[util.ArrayList[Int]].get(0))
+        } else {
+          v.property(pro._1, pro._2)
+        }
       })
       cache.replace(name, v)
       v
     } else {
       val v = graph.addVertex(T.id, name:lang.Long, T.label, DEFAULT_VERTEX_LABEL)
       properties.asScala.foreach(pro => {
-        v.property(pro._1, pro._2)
+        if (pro._2.isInstanceOf[util.ArrayList[Int]]) {
+          v.property(pro._1, pro._2.asInstanceOf[util.ArrayList[Int]].get(0))
+        } else {
+          v.property(pro._1, pro._2)
+        }
+
       })
       cache.put(name, v)
       v
+    }
+  }
+  def getOrCreateVertexForGraphDB(star:StarGraph, cache:util.HashMap[String, Object],
+                                  originalID: String, isCenter: Boolean,
+                                  traversalDB: GraphTraversalSource):Vertex = {
+
+    // Get the vertex contained in the cache or create one
+    // Return the vertex
+    val graphsonVertex = star.getStarVertex
+
+    if (cache.containsKey(originalID) && !isCenter) {
+      val vid = cache.get(originalID)
+      traversalDB.V(vid).next()
+    }
+    else if (!cache.containsKey(originalID) && !isCenter) {
+      var v = traversalDB.addV(graphsonVertex.label())
+      v.property("originalID", originalID)
+      val vtmp = v.next()
+      CommonSerial.safeCommit(traversalDB)
+      cache.put(originalID, vtmp.id())
+      vtmp
+    } else if (cache.containsKey(originalID) && isCenter) {
+      // Add the properties only if the vertex is center vertex
+      val vid = cache.get(originalID)
+      var v = traversalDB.V(vid)
+
+      graphsonVertex.properties().asScala.foreach((pro : VertexProperty[Nothing]) => {
+        v = v.property(pro.key(), pro.value())
+      })
+      cache.replace(originalID, vid)
+      val vtmp = v.next()
+      CommonSerial.safeCommit(traversalDB)
+      vtmp
+    } else {
+      var v = traversalDB.addV(graphsonVertex.label())
+      v.property("originalID", originalID)
+      graphsonVertex.properties().asScala.foreach((pro : VertexProperty[Nothing]) => {
+        v = v.property(pro.key(), pro.value())
+      })
+      val vtmp = v.next()
+      CommonSerial.safeCommit(traversalDB)
+      cache.put(originalID, vtmp.id())
+      vtmp
+    }
+  }
+
+  def getOrCreateEdgeForStarGraph(src: Vertex, cache:util.HashMap[lang.Long, Edge],
+                                  dst: Vertex, edgeID: lang.Long,
+                                  properties :util.HashMap[String, java.io.Serializable]
+                                 ):Edge = {
+
+    if(cache.containsKey(edgeID)){
+      cache.get(edgeID)
+    } else {
+      val newEdge = src.addEdge(DEFAULT_EDGE_LABEL,dst,T.id,edgeID)
+      if (newEdge != null && properties.size > 0) addProperties(newEdge, properties)
+      cache.put(edgeID,newEdge)
+      newEdge
     }
   }
 

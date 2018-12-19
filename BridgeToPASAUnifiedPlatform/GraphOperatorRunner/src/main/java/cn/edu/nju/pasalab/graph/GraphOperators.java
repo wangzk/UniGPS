@@ -40,7 +40,9 @@ public class GraphOperators implements GraphOpService.Iface {
             CSVFileToGraph.toGraphSON(arguments);
         } else if (outputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_NEO4J)) {
             CSVFileToGraph.toGraphDB(arguments);
-        } else {
+        } else if (outputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_ORIENTDB)) {
+            CSVFileToGraph.toGraphDB(arguments);
+        }else {
             throw new UnsupportedOperationException("No implementation for graph type:" + outputGraphType);
         }
 
@@ -63,7 +65,13 @@ public class GraphOperators implements GraphOpService.Iface {
         arguments.put(Constants.ARG_RUNMODE_CONF_FILE, runModeConfFile);
         if (inputGraphType.equals(Constants.GRAPHTYPE_GRAPHSON)) {
             GraphToCSVFile.fromGraphSON(arguments);
-        } else {
+        } else if (inputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_NEO4J)) {
+            arguments.put(Constants.ARG_INPUT_GRAPH_TYPE,Constants.GRAPHTYPE_GRAPHDB_NEO4J);
+            GraphToCSVFile.fromGraphDB(arguments);
+        } else if (inputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_ORIENTDB)) {
+            arguments.put(Constants.ARG_INPUT_GRAPH_TYPE,Constants.GRAPHTYPE_GRAPHDB_ORIENTDB);
+            GraphToCSVFile.fromGraphDB(arguments);
+        }else {
             throw new UnsupportedOperationException("No implementation for graph type:" + inputGraphType);
         }
         return "success";
@@ -86,6 +94,13 @@ public class GraphOperators implements GraphOpService.Iface {
             if (inputGraphType.equals(Constants.GRAPHTYPE_GRAPHSON)
                     && outputGraphType.equals(Constants.GRAPHTYPE_GRAPHSON)) {
                 LabelPropagationGraphComputer.fromGraphSONToGraphSON(arguments);
+            } else if (inputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_NEO4J)
+                    || inputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_ORIENTDB)
+                    && outputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_NEO4J)
+                    || outputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_ORIENTDB)) {
+                arguments.put(Constants.ARG_INPUT_GRAPH_TYPE,inputGraphType);
+                arguments.put(Constants.ARG_OUTPUT_GRAPH_TYPE,outputGraphType);
+                LabelPropagationGraphComputer.fromGraphDBToGraphDB(arguments);
             } else {
                 throw new UnsupportedOperationException("No implementation for input/output graph type combination:"
                         + inputGraphType + "/" + outputGraphType);
@@ -95,6 +110,13 @@ public class GraphOperators implements GraphOpService.Iface {
             if (inputGraphType.equals(Constants.GRAPHTYPE_GRAPHSON)
                     && outputGraphType.equals(Constants.GRAPHTYPE_GRAPHSON)) {
                 LabelPropagationGraphX.fromGraphSONToGraphSON(arguments);
+            } else if (inputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_NEO4J)
+                    || inputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_ORIENTDB)
+                    && outputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_NEO4J)
+                    || outputGraphType.equals(Constants.GRAPHTYPE_GRAPHDB_ORIENTDB)) {
+                arguments.put(Constants.ARG_INPUT_GRAPH_TYPE,inputGraphType);
+                arguments.put(Constants.ARG_OUTPUT_GRAPH_TYPE,outputGraphType);
+                LabelPropagationGraphX.fromGraphDBToGraphDB(arguments);
             } else {
                 throw new UnsupportedOperationException("No implementation for input/output graph type combination:"
                         + inputGraphType + "/" + outputGraphType);

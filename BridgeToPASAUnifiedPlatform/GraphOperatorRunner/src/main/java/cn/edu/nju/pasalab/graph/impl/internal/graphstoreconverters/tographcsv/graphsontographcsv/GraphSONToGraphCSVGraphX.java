@@ -109,7 +109,8 @@ public class GraphSONToGraphCSVGraphX {
             StarGraph.StarVertex v = tuple2._2.get();
             StarGraph g = StarGraph.of(v);
             StringBuilder csvLine = new StringBuilder();
-            csvLine.append("," + Long.parseLong(v.id().toString(), 10));
+            //csvLine.append("," + Long.parseLong(v.id().toString(), 10));
+            csvLine.append("," + v.id().toString());
             for(String pName: vertexProperties) {
                 Object propertyValue = g.traversal().V(v.id()).values(pName).next();
                 CSVUtils.CSVSchema.PropertyType type = vertexSchema_b.getColumnType().get(pName);
@@ -141,8 +142,10 @@ public class GraphSONToGraphCSVGraphX {
 
         JavaRDD<String> edgeCsvLineRDD = edgelistRDD.map(edge -> {
             StringBuilder csvLine = new StringBuilder();
-            csvLine.append("," + Long.parseLong(edge.inVertex().id().toString(), 10));
-            csvLine.append("," + Long.parseLong(edge.outVertex().id().toString(), 10));
+            //csvLine.append("," + Long.parseLong(edge.inVertex().id().toString(), 10));
+            //csvLine.append("," + Long.parseLong(edge.outVertex().id().toString(), 10));
+            csvLine.append("," + edge.inVertex().id().toString());
+            csvLine.append("," + edge.outVertex().id().toString());
             for(String pName: edgeProperties) {
                 Object propertyValue = edge.values(pName).next();
                 CSVUtils.CSVSchema.PropertyType type = edgeSchema_b.getColumnType().get(pName);

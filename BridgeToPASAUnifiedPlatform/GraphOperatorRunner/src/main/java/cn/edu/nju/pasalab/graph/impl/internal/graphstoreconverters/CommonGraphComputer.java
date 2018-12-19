@@ -60,7 +60,7 @@ public class CommonGraphComputer {
         }
 
         public void stop() throws Exception {
-            jsc.close();
+            //jsc.close();
             sc.stop();
         }
 

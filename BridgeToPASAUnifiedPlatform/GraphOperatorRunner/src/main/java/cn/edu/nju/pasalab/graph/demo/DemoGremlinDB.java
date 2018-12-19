@@ -1,6 +1,9 @@
 package cn.edu.nju.pasalab.graph.demo;
 
+import cn.edu.nju.pasalab.graph.Constants;
+import cn.edu.nju.pasalab.graph.impl.internal.graphstoreconverters.tographson.graphdbtographson.GraphDBToGraphSONSerial;
 import cn.edu.nju.pasalab.graph.impl.internal.graphstoreconverters.tographrdd.GraphDBToGraphRDD;
+import cn.edu.nju.pasalab.graph.impl.internal.graphstoreconverters.tographson.GraphDBToGraphSONGraphX;
 import cn.edu.nju.pasalab.graph.util.DBClient.client.IClient;
 import cn.edu.nju.pasalab.graph.util.DBClient.factory.Neo4jClientFactory;
 import cn.edu.nju.pasalab.graph.util.DBClient.factory.OrientDBClientFactory;
@@ -29,19 +32,27 @@ public class DemoGremlinDB {
         IClient db = factory.createClient(confPath);
         Graph graph = db.openDB();
 
-        /*Transaction transaction = graph.tx();
+        /*GraphDBToGraphSONSerial.converter(confPath ,Constants.GRAPHTYPE_GRAPHDB_NEO4J,
+                "/home/lijunhong/graphxtosontest/serialdbtoson.json");*/
+
+        Transaction transaction = graph.tx();
         // use Graph API to create, update and delete Vertices and Edges
         graph.io(IoCore.graphson()).readGraph("/home/lijunhong/graphxtosontest/directed.csv.graph/test.json");
-        transaction.commit();*/
+        //graph.io(IoCore.graphson()).readGraph("/home/lijunhong/graphxtosontest/tmp_181212173254/part-r-00000");
+        transaction.commit();
 
-        SparkConf conf = new SparkConf().setMaster("local").setAppName("gremlin neo4j");
+
+        /*SparkConf conf = new SparkConf().setMaster("local").setAppName("gremlin neo4j");
         SparkContext sc = new SparkContext(conf);
 
-
-        org.apache.spark.graphx.Graph<Map<String, Serializable>,
+        GraphDBToGraphSONGraphX.converter(graph.traversal(),sc,confPath,
+                "/home/lijunhong/graphxtosontest/dbtoson.json");*/
+/*        org.apache.spark.graphx.Graph<Map<String, Serializable>,
                 Map<String, Serializable>> graphxTest  = GraphDBToGraphRDD.converter(graph.traversal(),sc,confPath);
 
-        System.out.println(graphxTest.edges().count());
+        System.out.println(graphxTest.edges().count());*/
+
+
         /*for(Edge line:graphxTest.edges().count()){
             System.out.println("* "+line.srcId());
         }*/
