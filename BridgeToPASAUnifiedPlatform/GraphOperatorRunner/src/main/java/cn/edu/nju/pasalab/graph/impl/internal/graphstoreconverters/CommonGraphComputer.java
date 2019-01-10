@@ -94,7 +94,7 @@ public class CommonGraphComputer {
                     Vertex>
     {
 
-        static class ProcessAdjEdges {
+        public static class ProcessAdjEdges {
             String centerVertexName;
             Iterable<Tuple3<String, VertexDirection, Map<String, Object>>> adjs;
             Map<String, Object> vertexProperties;

@@ -144,10 +144,24 @@ public class CSVUtils {
             return builder.toString();
         }
 
-        public String toString() {
+        /*public String toString() {
             return "CSV Schema:" + toSchemaDescription();
-        }
+        }*/
 
+        public String toPropertiesString(boolean isVertex) {
+            int attrStartPosition;
+            if(isVertex){
+                attrStartPosition = 1;
+            }else{
+                attrStartPosition = 2;
+            }
+            StringBuilder builder = new StringBuilder();
+            for (int i = attrStartPosition; i < columnNames.length - 1; i++) {
+                builder.append(columnNames[i] + ",");
+            }
+            builder.append(columnNames[columnNames.length - 1]);
+            return builder.toString();
+        }
         public Map<String,Object> parseCSVLine(String line) throws IOException {
             Map<String, Object> propertyMap = new HashMap<>();
             CSVRecord record = CSVParser.parse(line, CSVFormat.RFC4180).iterator().next();
