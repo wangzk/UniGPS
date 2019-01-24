@@ -48,10 +48,7 @@ public class GraphCSVToGraphSONGraphComputer {
         String graphComputerConfFile = arguments.get(cn.edu.nju.pasalab.graph.Constants.ARG_RUNMODE_CONF_FILE);
 
          //TEST
-        /*
-        String outputGraphFilePath = "file:///home/lijunhong/graphxtosontest/hadoopcsvtest";
-        String inputGraphFilePath = "file:///home/lijunhong/graphxtosontest/hahahaha.txt";
-        String edgeCSVFilePath = "/home/lijunhong/graphxtosontest/test.csv";
+        /*String edgeCSVFilePath = "/home/lijunhong/graphxtosontest/test.csv";
         String vertexCSVFilePath = "/home/lijunhong/graphxtosontest/vertex.csv";
         String outputFilePath ="/home/lijunhong/graphxtosontest/hadoophaha.txt";
         String edgeSrcColumn = "p1";
@@ -168,6 +165,21 @@ class CSVToSONreduce extends Reducer<Text, Text, NullWritable, VertexWritable> {
         return () -> iterator;
     }
 
+    private void parseProperties(CSVUtils.CSVSchema csvSchema, List<String> propertyColumns,
+                                 Map<String, Object> properties, List<String> values){
+        for (int i = 0; i < propertyColumns.size(); i++) {
+            CSVUtils.CSVSchema.PropertyType type = csvSchema.getColumnType().get(propertyColumns.get(i));
+            if (type.equals(CSVUtils.CSVSchema.PropertyType.STRING)) {
+                properties.put(propertyColumns.get(i),values.get(i));
+            } else if (type.equals(CSVUtils.CSVSchema.PropertyType.DOUBLE)) {
+                properties.put(propertyColumns.get(i),new Double(values.get(i)));
+            } else if (type.equals(CSVUtils.CSVSchema.PropertyType.INT)) {
+                properties.put(propertyColumns.get(i),new Integer(values.get(i)));
+            }
+        }
+
+    }
+
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
         List<String> edgePropertyColumns = ArgumentUtils.toList(context.getConfiguration().get("edgePropertyColumns"));
         String edgePath = "file://" + context.getConfiguration().get("edgeCSVFilePath");
@@ -189,16 +201,7 @@ class CSVToSONreduce extends Reducer<Text, Text, NullWritable, VertexWritable> {
         for (Text val : edgeValues) {
             List<String> edgeInfo = ArgumentUtils.toList(val.toString());
             Map<String, Object> edgeProperties = new HashMap<>();
-            for (int i = 0; i < edgePropertyColumns.size(); i++) {
-                CSVUtils.CSVSchema.PropertyType type = edgeCsvSchema.getColumnType().get(edgePropertyColumns.get(i));
-                if (type.equals(CSVUtils.CSVSchema.PropertyType.STRING)) {
-                    edgeProperties.put(edgePropertyColumns.get(i),edgeInfo.get(i));
-                } else if (type.equals(CSVUtils.CSVSchema.PropertyType.DOUBLE)) {
-                    edgeProperties.put(edgePropertyColumns.get(i),new Double(edgeInfo.get(i)));
-                } else if (type.equals(CSVUtils.CSVSchema.PropertyType.INT)) {
-                    edgeProperties.put(edgePropertyColumns.get(i),new Integer(edgeInfo.get(i)));
-                }
-            }
+            parseProperties(edgeCsvSchema,edgePropertyColumns,edgeProperties,edgeInfo);
             Tuple3<String, CommonGraphComputer.VertexDirection, Map<String, Object>> srctupleInfo =
                     new Tuple3<>(edgeInfo.get(1),CommonGraphComputer.VertexDirection.SRC,edgeProperties);
             Tuple3<String, CommonGraphComputer.VertexDirection, Map<String, Object>> dsttupleInfo =
@@ -215,19 +218,7 @@ class CSVToSONreduce extends Reducer<Text, Text, NullWritable, VertexWritable> {
 
         for (Text val : vertexValues) {
             List<String> vertexInfo = ArgumentUtils.toList(val.toString());
-
-            for (int i = 0; i < vertexPropertyColumns.size(); i++) {
-                CSVUtils.CSVSchema.PropertyType type = vertexCsvSchema.getColumnType().get(vertexPropertyColumns.get(i));
-                System.out.println(type);
-                if (type.equals(CSVUtils.CSVSchema.PropertyType.STRING)) {
-                    vertexProperties.put(vertexPropertyColumns.get(i),vertexInfo.get(i));
-                } else if (type.equals(CSVUtils.CSVSchema.PropertyType.DOUBLE)) {
-                    vertexProperties.put(vertexPropertyColumns.get(i),new Double(vertexInfo.get(i)));
-                } else if (type.equals(CSVUtils.CSVSchema.PropertyType.INT)) {
-                    vertexProperties.put(vertexPropertyColumns.get(i),new Integer(vertexInfo.get(i)));
-                }
-            }
-
+            parseProperties(vertexCsvSchema,vertexPropertyColumns,vertexProperties,vertexInfo);
         }
 
         Iterable<Tuple3<String, CommonGraphComputer.VertexDirection, Map<String, Object>>> adjs = iteratorToIterable(adjsList.iterator());
